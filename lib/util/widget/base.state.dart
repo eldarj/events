@@ -22,15 +22,7 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> {
   }
 
   Widget render() {
-    return displayLoader ? buildSpinner() : Container();
-  }
-
-  Widget buildSpinner() {
-    return Container(
-        alignment: Alignment.center,
-        child: CircularProgressIndicator(
-            backgroundColor: Colors.grey.shade300,
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.grey)));
+    return Container();
   }
 
   preRender() {}

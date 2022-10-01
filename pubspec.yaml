@@ -39,6 +39,8 @@ dependencies:
   http: ^0.13.5
   shared_preferences: ^2.0.15
   permission_handler: ^10.0.2
+  intl: ^0.17.0
+  fab_circular_menu: ^1.0.2
   cached_network_image: ^3.2.2
 
 dev_dependencies:
