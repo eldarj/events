@@ -4,6 +4,9 @@ import 'package:flutter/services.dart';
 
 import 'activity/events/overview/events.overview.activity.dart';
 
+late Size deviceMediaSize;
+late EdgeInsets deviceMediaPadding;
+
 void main() {
   runApp(const MyApp());
 }
@@ -29,7 +32,11 @@ class MyApp extends StatelessWidget {
       theme: themeData,
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: const EventsOverviewActivity(),
+        body: Builder(builder: (context) {
+          deviceMediaSize = MediaQuery.of(context).size;
+          deviceMediaPadding = MediaQuery.of(context).padding;
+          return const EventsOverviewActivity();
+        }),
         floatingActionButton: FabCircularMenu(
             fabElevation: 1.0,
             fabColor: Colors.redAccent,

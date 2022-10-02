@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 class HumanTimes {
   static String getDate(String timestamp) {
-    final dateFormat = DateFormat('dd.MM.yyyy');
+    final dateFormat = DateFormat('EEEE MMM. d');
     final date =
         DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp).round());
 

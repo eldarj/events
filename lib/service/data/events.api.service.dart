@@ -10,8 +10,14 @@ class EventModel {
   String type;
   String ticketPrice;
 
+  String url;
+
+  bool saved;
+
   EventModel(this.id, this.name, this.description, this.imagePath,
-      this.timestamp, this.location, this.type, this.ticketPrice);
+      this.timestamp, this.location, this.type, this.ticketPrice, this.saved,
+      {this.url =
+          'https://dubai.platinumlist.net/event-tickets/80632/the-green-planet-dubai'});
 }
 
 class EventsAPIService {
@@ -35,6 +41,7 @@ class EventsAPIService {
       'Zero Gravity',
       'Beach Club',
       '300',
+      false,
     ));
 
     events.add(EventModel(
@@ -57,6 +64,7 @@ The orchestral sound is topped off by the stunning vocals of three exceptional a
       'Dubai Opera',
       'Opera',
       '250',
+      false,
     ));
 
     events.add(EventModel(
@@ -74,6 +82,7 @@ Location: First Floor
       'Mercato - The Good Life',
       'Movie Premiere',
       '125.50',
+      false,
     ));
 
     events.add(EventModel(
@@ -108,6 +117,7 @@ Strategic versatility
       'Meirc Training & Consulting',
       'Conference',
       '800',
+      false,
     ));
 
     events.add(EventModel(
@@ -122,6 +132,7 @@ Strategic versatility
       'Zero Gravity',
       'Beach Club',
       '300',
+      false,
     ));
 
     events.add(EventModel(
@@ -138,6 +149,7 @@ Strategic versatility
       'Scalathon - Avenue 36th',
       'Conference',
       '920.10',
+      false,
     ));
 
     return events;
