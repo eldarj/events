@@ -1,4 +1,4 @@
-import 'package:dubai_events/util/widget/base.state.dart';
+import 'package:dubai_events/shared/base/base.state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 

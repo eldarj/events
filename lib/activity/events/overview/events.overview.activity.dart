@@ -1,14 +1,15 @@
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
 import 'package:dubai_events/activity/events/single/single.event.activity.dart';
 import 'package:dubai_events/service/data/events.api.service.dart';
 import 'package:dubai_events/shared/activity-title/activity.title.component.dart';
+import 'package:dubai_events/shared/base/base.state.dart';
 import 'package:dubai_events/shared/info/info.component.dart';
 import 'package:dubai_events/shared/loader/spinner.component.dart';
 import 'package:dubai_events/util/datetime/human.times.util.dart';
 import 'package:dubai_events/util/navigation/navigator.util.dart';
 import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
-import 'package:dubai_events/util/widget/base.state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -105,7 +106,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     var eventImageWidget = CachedNetworkImage(
       fit: BoxFit.cover,
       alignment: Alignment.center,
-      imageUrl: event.imagePath,
+      imageUrl: event.coverImagePath,
       placeholder: (context, url) => Container(
           alignment: Alignment.center,
           height: 25,
@@ -195,46 +196,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                             style: const TextStyle(
                                 fontSize: 16, color: Colors.black54)),
                       ),
-                      Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                OutlinedButton(
-                                    onPressed: () => addToCalendar(event),
-                                    style: ElevatedButton.styleFrom(
-                                      shape: const StadiumBorder(),
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: Colors.redAccent,
-                                    ),
-                                    child: Text('Add to Calendar'),
-                                    ),
-                                Row(children: [
-                                  IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          event.saved = !event.saved;
-                                        });
-                                        SnackbarHandler.show(context,
-                                            text: 'Event saved to Wishlist');
-                                      },
-                                      icon: Icon(
-                                          event.saved
-                                              ? CupertinoIcons.bookmark_fill
-                                              : CupertinoIcons.bookmark,
-                                          color: event.saved
-                                              ? Colors.yellow.shade600
-                                              : Colors.black54)),
-                                  IconButton(
-                                      onPressed: () {
-                                        Share.share(event.url);
-                                      },
-                                      icon: Icon(
-                                          CupertinoIcons
-                                              .arrowshape_turn_up_right,
-                                          color: Colors.black54)),
-                                ])
-                              ]))
+                      EventDetailsPartial(event: event, setState: setState)
                     ]))
           ]),
         ),
@@ -265,15 +227,5 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
       displayLoader = false;
       isError = true;
     });
-  }
-
-  void addToCalendar(EventModel event) {
-    Add2Calendar.addEvent2Cal(Event(
-      title: event.name,
-      description: event.description,
-      location: event.location,
-      startDate: DateTime.fromMillisecondsSinceEpoch(int.parse(event.timestamp)),
-      endDate: DateTime.fromMillisecondsSinceEpoch(int.parse(event.timestamp)),
-    ));
   }
 }

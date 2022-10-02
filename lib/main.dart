@@ -1,18 +1,24 @@
+import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shake/shake.dart';
 
 import 'activity/events/overview/events.overview.activity.dart';
+
+late BuildContext rootContext;
 
 late Size deviceMediaSize;
 late EdgeInsets deviceMediaPadding;
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  bool initialized = false;
+
+  MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -33,8 +39,15 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Builder(builder: (context) {
+          rootContext = context;
           deviceMediaSize = MediaQuery.of(context).size;
           deviceMediaPadding = MediaQuery.of(context).padding;
+
+          if (!initialized) {
+            initialized = true;
+            initializeShakeDetection();
+          }
+
           return const EventsOverviewActivity();
         }),
         floatingActionButton: FabCircularMenu(
@@ -70,4 +83,12 @@ class MyApp extends StatelessWidget {
       ),
     ));
   }
+}
+
+initializeShakeDetection() {
+  ShakeDetector.autoStart(onPhoneShake: () {
+    SnackbarHandler.show(rootContext, text: """
+        🎉 Congrats, You won the Hidden Shaker Award! We'll send you the gift to your inbox shortly.
+        """);
+  });
 }

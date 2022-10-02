@@ -2,21 +2,23 @@ class EventModel {
   String id;
 
   String name;
-  String imagePath;
   String description;
+  
+  String coverImagePath;
+  List<String> galleryImagePaths;
+  
+  String type;
   String timestamp;
   String location;
-
-  String type;
   String ticketPrice;
-
   String url;
 
+  // user related fields
   bool saved;
 
-  EventModel(this.id, this.name, this.description, this.imagePath,
+  EventModel(this.id, this.name, this.description, this.coverImagePath,
       this.timestamp, this.location, this.type, this.ticketPrice, this.saved,
-      {this.url =
+      {this.galleryImagePaths = const [], this.url =
           'https://dubai.platinumlist.net/event-tickets/80632/the-green-planet-dubai'});
 }
 
@@ -42,6 +44,13 @@ class EventsAPIService {
       'Beach Club',
       '300',
       false,
+      galleryImagePaths: [
+        'https://comingsoon.ae/wp-content/uploads/2016/11/zero-grav-1.jpg',
+        'https://www.0-gravity.ae/sites/default/files/home-hilite1.jpg',
+        'https://www.0-gravity.ae/sites/default/files/events_2.jpg',
+        'https://www.0-gravity.ae/sites/default/files/Salut%20Photo.jpeg',
+        'https://www.0-gravity.ae/sites/default/files/Zero_033_19.jpg'
+      ],
     ));
 
     events.add(EventModel(
