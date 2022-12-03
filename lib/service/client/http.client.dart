@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:http/http.dart' as http;
 
-const String apiBaseUrl = 'http://46.101.169.71:8089';
+const String apiBaseUrl = 'http://192.168.1.139:8191';
 
 class HttpClient {
   static Map<String, http.Response> cache = {};

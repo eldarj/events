@@ -1,5 +1,5 @@
 import 'package:add_2_calendar/add_2_calendar.dart';
-import 'package:dubai_events/service/data/events.api.service.dart';
+import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +46,7 @@ class EventActionsPartial extends StatelessWidget {
                             : Colors.black54)),
                 IconButton(
                     onPressed: () {
-                      Share.share(event.url);
+                      Share.share(event.reservationUrl); // TODO: Implement location sharing
                     },
                     icon: const Icon(
                         CupertinoIcons
@@ -61,10 +61,10 @@ class EventActionsPartial extends StatelessWidget {
     Add2Calendar.addEvent2Cal(Event(
       title: event.name,
       description: event.description,
-      location: event.location,
+      location: event.eventLocation?.name ?? 'Dubai Events',
       startDate:
-      DateTime.fromMillisecondsSinceEpoch(int.parse(event.timestamp)),
-      endDate: DateTime.fromMillisecondsSinceEpoch(int.parse(event.timestamp)),
+      DateTime.fromMillisecondsSinceEpoch(int.parse(event.eventTimestamp)),
+      endDate: DateTime.fromMillisecondsSinceEpoch(int.parse(event.eventTimestamp)),
     ));
   }
 }

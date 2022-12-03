@@ -1,18 +1,19 @@
-import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dubai_events/activity/events/partial/event.actions.partial.dart';
 import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
 import 'package:dubai_events/activity/events/single/single.event.activity.dart';
-import 'package:dubai_events/service/data/events.api.service.dart';
+import 'package:dubai_events/service/client/http.client.dart';
+import 'package:dubai_events/service/data/events.location.model.dart';
+import 'package:dubai_events/service/client/http.response.extension.dart';
+import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/shared/activity-title/activity.title.component.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
 import 'package:dubai_events/shared/info/info.component.dart';
 import 'package:dubai_events/shared/layout/horizontal.line.component.dart';
 import 'package:dubai_events/shared/loader/spinner.component.dart';
-import 'package:dubai_events/util/datetime/human.times.util.dart';
 import 'package:dubai_events/util/navigation/navigator.util.dart';
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
 
 class EventsOverviewActivity extends StatefulWidget {
   const EventsOverviewActivity({super.key});
@@ -106,13 +107,13 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     var eventImageWidget = CachedNetworkImage(
       fit: BoxFit.cover,
       alignment: Alignment.center,
-      imageUrl: event.coverImagePath,
+      imageUrl: event.coverImageUrl,
       placeholder: (context, url) => Container(
           alignment: Alignment.center,
           height: 25,
           width: 25,
           child: const CircularProgressIndicator(color: Colors.redAccent)),
-      errorWidget: (context, url, error) => const Icon(Icons.error),
+      errorWidget: (context, url, error) => const Icon(Icons.broken_image_outlined, color: Colors.grey),
     );
 
     return Material(
@@ -153,9 +154,9 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                       EventDetailsPartial(event: event),
                       const HorizontalLine(),
                       Text(
-                          event.description.length > 200
-                              ? "${event.description.substring(0, 200)}..."
-                              : event.description,
+                          event.shortDescription.length > 200
+                              ? "${event.shortDescription.substring(0, 200)}..."
+                              : event.shortDescription,
                           style: const TextStyle(
                               fontSize: 16, color: Colors.black54)),
                       EventActionsPartial(event: event, setState: setState)
@@ -168,15 +169,24 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   // Data calls
   Future doGetEvents() async {
-    List<EventModel> events = EventsAPIService.getEvents();
+    String url = "/api/events";
+    http.Response? response = await HttpClient.get(url);
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 500));
 
-    return events;
+    if(response != null && response.statusCode != 200) {
+      throw Exception();
+    }
+
+    dynamic result = response?.decode();
+
+    return result;
   }
 
   void onGetEventsSuccess(result) async {
-    events = result;
+    print(result);
+    events = EventModel.fromJsonList(result);
+    print(events);
 
     setState(() {
       displayLoader = false;
@@ -185,6 +195,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   }
 
   void onGetEventsError(Object error) async {
+    print(error);
     setState(() {
       displayLoader = false;
       isError = true;

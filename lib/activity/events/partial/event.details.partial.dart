@@ -1,4 +1,4 @@
-import 'package:dubai_events/service/data/events.api.service.dart';
+import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/util/datetime/human.times.util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,22 +11,28 @@ class EventDetailsPartial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        margin: const EdgeInsets.only(top: 2.5, bottom: 2.5),
+        child: Row(children: [
+          Container(
+            margin: const EdgeInsets.only(right: 5),
+            child: const Icon(CupertinoIcons.map, color: Colors.grey, size: 10),
+          ),
+          Row(children: [
+            Text("${event.eventLocation?.name}",
+                style: const TextStyle(color: Colors.grey)),
+            event.eventTimestamp.isNotEmpty
+                ? Text(", ${HumanTimes.getDate(event.eventTimestamp)}",
+                    style: const TextStyle(color: Colors.grey))
+                : Container()
+          ])
+        ]),
+      ),
       Row(children: [
         Container(
           margin: const EdgeInsets.only(right: 5),
-          child: const Icon(CupertinoIcons.map, color: Colors.grey, size: 10),
-        ),
-        Row(children: [
-          Text("${event.location}, ",
-              style: const TextStyle(color: Colors.grey)),
-          Text(HumanTimes.getDate(event.timestamp),
-              style: const TextStyle(color: Colors.grey)),
-        ])
-      ]),
-      Row(children: [
-        Container(
-          margin: const EdgeInsets.only(right: 5),
-          child: const Icon(CupertinoIcons.tickets, color: Colors.grey, size: 10),
+          child:
+              const Icon(CupertinoIcons.tickets, color: Colors.grey, size: 10),
         ),
         Text("${event.ticketPrice} AED",
             style: const TextStyle(color: Colors.grey)),

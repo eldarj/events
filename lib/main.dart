@@ -50,10 +50,10 @@ class MyApp extends StatelessWidget {
             ringWidth: 100,
             ringDiameter: 400,
             children: [
-              fabItem(Icons.star_border_rounded),
+              fabItem(Icons.bookmark_border_rounded),
               fabItem(Icons.notifications_none_rounded),
-              fabItem(Icons.person),
               fabItem(Icons.calendar_today),
+              fabItem(Icons.person),
             ]),
       ),
     );

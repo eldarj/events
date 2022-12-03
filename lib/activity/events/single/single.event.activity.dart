@@ -3,10 +3,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dubai_events/activity/events/partial/event.actions.partial.dart';
 import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
 import 'package:dubai_events/main.dart';
-import 'package:dubai_events/service/data/events.api.service.dart';
+import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
 import 'package:dubai_events/shared/maps/map.component.dart';
-import 'package:dubai_events/util/datetime/human.times.util.dart';
 import 'package:flutter/material.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 
@@ -42,7 +41,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
 
   @override
   Widget render() {
-    var galleryLength = widget.event.galleryImagePaths.length;
+    var galleryLength = widget.event.galleryImageUrls.length;
 
     return ListView(padding: EdgeInsets.zero, children: [
       Container(
@@ -62,7 +61,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                         galleryIndex = index + 1;
                       });
                     }),
-                items: widget.event.galleryImagePaths.map((imageUrl) {
+                items: widget.event.galleryImageUrls.map((imageUrl) {
                   return Builder(
                     builder: (BuildContext context) {
                       return Container(
@@ -80,7 +79,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                                 child: const CircularProgressIndicator(
                                     color: Colors.redAccent)),
                             errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
+                                const Icon(Icons.broken_image_outlined, color: Colors.grey),
                           ));
                     },
                   );
@@ -124,27 +123,51 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
         color: Colors.white,
         padding:
             const EdgeInsets.only(top: 15, bottom: 15, left: 10, right: 10),
+        child: Text(widget.event.shortDescription, style: TextStyle(color: Colors.grey.shade500)),
+      ),
+      Container(height: 5, color: Colors.grey.shade100),
+      Container(
+        color: Colors.white,
+        padding:
+        const EdgeInsets.only(top: 15, bottom: 15, left: 10, right: 10),
         child: Text(widget.event.description, style: TextStyle(color: Colors.grey.shade500)),
       ),
       Container(height: 5, color: Colors.grey.shade100),
-      GestureDetector(
+
+      widget.event.eventLocation?.mapImageUrl != null ? GestureDetector(
         onTap: () {
-          MapsLauncher.launchCoordinates(widget.event.eventLocation.latitude,
-              widget.event.eventLocation.longitude, widget.event.location);
+          MapsLauncher.launchCoordinates(widget.event.eventLocation?.latitude ?? 0,
+              widget.event.eventLocation?.longitude ?? 0, widget.event.eventLocation?.name);
         },
         child: Container(
           padding: const EdgeInsets.all(15),
-          height: deviceMediaSize.width - 50,
-          width: deviceMediaSize.width - 50,
           color: Colors.white,
-          child: AbsorbPointer(
-            child: MapComponent(
-                latitude: widget.event.eventLocation.latitude,
-                longitude: widget.event.eventLocation.longitude),
+          child: CachedNetworkImage(
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            imageUrl: widget.event.eventLocation?.mapImageUrl ?? "",
+            placeholder: (context, url) => Container(
+                alignment: Alignment.center,
+                height: 25,
+                width: 25,
+                child: const CircularProgressIndicator(
+                    color: Colors.redAccent)),
+            errorWidget: (context, url, error) =>
+            const Icon(Icons.broken_image_outlined, color: Colors.grey),
           ),
         ),
+      ) : Container(),
+      Container(
+        padding: const EdgeInsets.all(15),
+        height: deviceMediaSize.width - 50,
+        width: deviceMediaSize.width - 50,
+        color: Colors.white,
+        child: AbsorbPointer(
+          child: MapComponent(
+              latitude: widget.event.eventLocation?.latitude ?? 0,
+              longitude: widget.event.eventLocation?.longitude ?? 0),
+        ),
       ),
-      Container(height: 500),
     ]);
   }
 }
