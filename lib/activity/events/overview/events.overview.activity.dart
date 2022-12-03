@@ -1,16 +1,16 @@
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dubai_events/activity/events/partial/event.actions.partial.dart';
 import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
 import 'package:dubai_events/activity/events/single/single.event.activity.dart';
 import 'package:dubai_events/service/data/events.api.service.dart';
 import 'package:dubai_events/shared/activity-title/activity.title.component.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
 import 'package:dubai_events/shared/info/info.component.dart';
+import 'package:dubai_events/shared/layout/horizontal.line.component.dart';
 import 'package:dubai_events/shared/loader/spinner.component.dart';
 import 'package:dubai_events/util/datetime/human.times.util.dart';
 import 'package:dubai_events/util/navigation/navigator.util.dart';
-import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -145,58 +145,20 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(event.name,
-                                style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54)),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.only(top: 5, bottom: 10),
-                        decoration: BoxDecoration(
-                            border: Border(
-                          bottom: BorderSide(color: Colors.grey.shade200),
-                        )),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("${event.ticketPrice} AED",
-                                  style: const TextStyle(color: Colors.grey)),
-                              Row(children: [
-                                Container(
-                                  margin: const EdgeInsets.only(right: 5),
-                                  child: const Icon(Icons.location_on,
-                                      color: Colors.grey, size: 10),
-                                ),
-                                Row(children: [
-                                  Text("${event.location}, ",
-                                      style:
-                                          const TextStyle(color: Colors.grey)),
-                                  Text(HumanTimes.getDate(event.timestamp),
-                                      style:
-                                          const TextStyle(color: Colors.grey)),
-                                ])
-                              ]),
-                            ]),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.only(top: 10),
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                            event.description.length > 200
-                                ? "${event.description.substring(0, 200)}..."
-                                : event.description,
-                            style: const TextStyle(
-                                fontSize: 16, color: Colors.black54)),
-                      ),
-                      EventDetailsPartial(event: event, setState: setState)
+                      Text(event.name,
+                          style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54)),
+                      EventDetailsPartial(event: event),
+                      const HorizontalLine(),
+                      Text(
+                          event.description.length > 200
+                              ? "${event.description.substring(0, 200)}..."
+                              : event.description,
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.black54)),
+                      EventActionsPartial(event: event, setState: setState)
                     ]))
           ]),
         ),

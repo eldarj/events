@@ -46,7 +46,10 @@ dependencies:
   add_2_calendar: ^2.1.2
   share_plus: ^4.4.0
   shake: ^2.1.0
+  google_maps_flutter: ^2.2.1
   carousel_slider: ^4.1.1
+  maps_launcher: ^2.0.1
+  anim_search_bar: ^2.0.2
 
 dev_dependencies:
   flutter_test:

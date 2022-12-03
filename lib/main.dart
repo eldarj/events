@@ -1,3 +1,4 @@
+import 'package:dubai_events/shared/dialog/generic-alert.dialog.dart';
 import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
@@ -87,8 +88,13 @@ class MyApp extends StatelessWidget {
 
 initializeShakeDetection() {
   ShakeDetector.autoStart(onPhoneShake: () {
-    SnackbarHandler.show(rootContext, text: """
-        🎉 Congrats, You won the Hidden Shaker Award! We'll send you the gift to your inbox shortly.
-        """);
+    print("SHAAAAKEEED!");
+    showDialog(context: rootContext, builder: (BuildContext context) {
+      return const GenericAlertDialog(
+        title: '🎉 Congrats',
+        message: "You won the Hidden Shaker Award! We'll send you the gift to your inbox shortly.",
+        positiveBtnText: 'Close',
+      );
+    });
   });
 }

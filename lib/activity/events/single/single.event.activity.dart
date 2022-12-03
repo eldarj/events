@@ -1,11 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dubai_events/activity/events/partial/event.actions.partial.dart';
 import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
 import 'package:dubai_events/main.dart';
 import 'package:dubai_events/service/data/events.api.service.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
+import 'package:dubai_events/shared/maps/map.component.dart';
 import 'package:dubai_events/util/datetime/human.times.util.dart';
 import 'package:flutter/material.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 
 class SingleEventActivity extends StatefulWidget {
   final EventModel event;
@@ -44,7 +47,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
     return ListView(padding: EdgeInsets.zero, children: [
       Container(
           height: 400,
-          decoration: const BoxDecoration(color: Colors.white),
+          color: Colors.white,
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
@@ -99,46 +102,47 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
             ],
           )),
       Container(
-          padding:
-              const EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
-          decoration: BoxDecoration(
-            color: Theme.of(context).backgroundColor,
-          ),
-          child: EventDetailsPartial(event: widget.event, setState: setState)),
+          color: Colors.white,
+          padding: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+          child: EventActionsPartial(event: widget.event, setState: setState)),
       Container(height: 5, color: Colors.grey.shade100),
       Container(
-        padding:
-            const EdgeInsets.only(top: 15, bottom: 15, left: 15, right: 15),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              bottom: BorderSide(color: Colors.grey.shade200),
-            )),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text("${widget.event.ticketPrice} AED",
-              style: const TextStyle(color: Colors.grey)),
-          Row(children: [
-            Container(
-              margin: const EdgeInsets.only(right: 5),
-              child:
-                  const Icon(Icons.location_on, color: Colors.grey, size: 10),
-            ),
-            Row(children: [
-              Text("${widget.event.location}, ",
-                  style: const TextStyle(color: Colors.grey)),
-              Text(HumanTimes.getDate(widget.event.timestamp),
-                  style: const TextStyle(color: Colors.grey)),
-            ])
-          ]),
-        ]),
+        color: Colors.white,
+        padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+        child: Text(widget.event.name,
+            style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black54)),
       ),
+      Container(
+          color: Colors.white,
+          padding: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+          child: EventDetailsPartial(event: widget.event)),
       Container(height: 5, color: Colors.grey.shade100),
       Container(
         color: Colors.white,
         padding:
-            const EdgeInsets.only(top: 15, bottom: 15, left: 15, right: 15),
-        child: Text(widget.event.description),
+            const EdgeInsets.only(top: 15, bottom: 15, left: 10, right: 10),
+        child: Text(widget.event.description, style: TextStyle(color: Colors.grey.shade500)),
+      ),
+      Container(height: 5, color: Colors.grey.shade100),
+      GestureDetector(
+        onTap: () {
+          MapsLauncher.launchCoordinates(widget.event.eventLocation.latitude,
+              widget.event.eventLocation.longitude, widget.event.location);
+        },
+        child: Container(
+          padding: const EdgeInsets.all(15),
+          height: deviceMediaSize.width - 50,
+          width: deviceMediaSize.width - 50,
+          color: Colors.white,
+          child: AbsorbPointer(
+            child: MapComponent(
+                latitude: widget.event.eventLocation.latitude,
+                longitude: widget.event.eventLocation.longitude),
+          ),
+        ),
       ),
       Container(height: 500),
     ]);
