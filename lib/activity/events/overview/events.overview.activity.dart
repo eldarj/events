@@ -25,12 +25,17 @@ class EventsOverviewActivity extends StatefulWidget {
 class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   List<EventModel> events = [];
 
+  int totalItemsLoaded = 0;
+  bool isLoadingOnScroll = false;
+  bool noMoreItemsToLoad = false;
+  int pageNumber = 0;
+
   initialize() async {
     setState(() {
       displayLoader = true;
     });
 
-    doGetEvents().then(onGetEventsSuccess, onError: onGetEventsError);
+    doGetEvents(page: pageNumber).then(onGetEventsSuccess, onError: onGetEventsError);
   }
 
   @override
@@ -82,23 +87,38 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   // Content
   Widget buildListView() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: events.length + 2,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return ActivityTitleComponent(
-                title: "Upcoming Events",
-                actionWidget: Image.asset('static/image/company/dubai-xs.png',
-                    height: 20));
-          }
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (!displayLoader && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+          getNextPageOnScroll();
+        }
 
-          if (index == events.length + 1) {
-            return Container(height: 75);
-          }
+        return true;
+      },
+      child: Expanded(
+        child: ListView.builder(
+          itemCount: events.length + 2,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return ActivityTitleComponent(
+                  title: "Upcoming Events",
+                  actionWidget: Image.asset('static/image/company/dubai-xs.png',
+                      height: 20));
+            }
 
-          return buildSingleEventRow(events[index - 1]);
-        },
+            if (index == events.length + 1) {
+              return Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.only(top: 5, bottom: 15),
+                  child: Text('For more Events visit www.enganger-cloud.com',
+                      style: TextStyle(
+                          color: Colors.grey.shade400, fontSize: 11)
+                  ));
+            }
+
+            return buildSingleEventRow(events[index - 1]);
+          },
+        ),
       ),
     );
   }
@@ -117,7 +137,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     );
 
     return Material(
-      color: Colors.white,
+      color: Colors.transparent,
       child: InkWell(
         onTap: () async {
           NavigatorUtil.push(
@@ -168,8 +188,23 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   }
 
   // Data calls
-  Future doGetEvents() async {
-    String url = "/api/events";
+  void getNextPageOnScroll() async {
+    if (!isLoadingOnScroll && !noMoreItemsToLoad) {
+      setState(() {
+        isLoadingOnScroll = true;
+      });
+      pageNumber++;
+      doGetEvents(page: pageNumber).then(onGetEventsSuccess, onError: onGetEventsError);
+    }
+  }
+
+  Future doGetEvents({page = 0, clearItems = false}) async {
+    if (clearItems) {
+      events.clear();
+      pageNumber = 0;
+    }
+
+    String url = "/api/events/upcoming?page=$page";
     http.Response? response = await HttpClient.get(url);
 
     await Future.delayed(const Duration(milliseconds: 500));
@@ -184,20 +219,25 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   }
 
   void onGetEventsSuccess(result) async {
-    print(result);
-    events = EventModel.fromJsonList(result);
-    print(events);
+    totalItemsLoaded += (result['totalElements'] as int);
+
+    if (result['totalElements'] == 0) {
+      noMoreItemsToLoad = true;
+    }
+
+    events.addAll(EventModel.fromJsonList(result['content']));
 
     setState(() {
       displayLoader = false;
+      isLoadingOnScroll = false;
       isError = false;
     });
   }
 
   void onGetEventsError(Object error) async {
-    print(error);
     setState(() {
       displayLoader = false;
+      isLoadingOnScroll = false;
       isError = true;
     });
   }

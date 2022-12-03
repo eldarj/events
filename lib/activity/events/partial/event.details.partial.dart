@@ -16,23 +16,22 @@ class EventDetailsPartial extends StatelessWidget {
         child: Row(children: [
           Container(
             margin: const EdgeInsets.only(right: 5),
-            child: const Icon(CupertinoIcons.map, color: Colors.grey, size: 10),
+            child: Icon(CupertinoIcons.map, color: Colors.grey.shade400, size: 14),
           ),
           Row(children: [
             Text("${event.eventLocation?.name}",
                 style: const TextStyle(color: Colors.grey)),
-            event.eventTimestamp.isNotEmpty
-                ? Text(", ${HumanTimes.getDate(event.eventTimestamp)}",
-                    style: const TextStyle(color: Colors.grey))
-                : Container()
+            Text(", ${HumanTimes.getDate(event.eventTimestamp)}",
+                style: const TextStyle(color: Colors.grey))
           ])
         ]),
       ),
+      Container(height: 2.5),
       Row(children: [
         Container(
           margin: const EdgeInsets.only(right: 5),
           child:
-              const Icon(CupertinoIcons.tickets, color: Colors.grey, size: 10),
+              Icon(CupertinoIcons.tickets, color: Colors.grey.shade400, size: 14),
         ),
         Text("${event.ticketPrice} AED",
             style: const TextStyle(color: Colors.grey)),

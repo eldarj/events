@@ -43,15 +43,15 @@ class EventActionsPartial extends StatelessWidget {
                             : CupertinoIcons.bookmark,
                         color: event.saved
                             ? Colors.yellow.shade600
-                            : Colors.black54)),
+                            : Colors.grey.shade400)),
                 IconButton(
                     onPressed: () {
                       Share.share(event.reservationUrl); // TODO: Implement location sharing
                     },
-                    icon: const Icon(
+                    icon: Icon(
                         CupertinoIcons
                             .arrowshape_turn_up_right,
-                        color: Colors.black54)),
+                        color: Colors.grey.shade400)),
               ])
             ])
     );
@@ -63,8 +63,8 @@ class EventActionsPartial extends StatelessWidget {
       description: event.description,
       location: event.eventLocation?.name ?? 'Dubai Events',
       startDate:
-      DateTime.fromMillisecondsSinceEpoch(int.parse(event.eventTimestamp)),
-      endDate: DateTime.fromMillisecondsSinceEpoch(int.parse(event.eventTimestamp)),
+      DateTime.fromMillisecondsSinceEpoch(event.eventTimestamp),
+      endDate: DateTime.fromMillisecondsSinceEpoch(event.eventTimestamp),
     ));
   }
 }

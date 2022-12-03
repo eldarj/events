@@ -5,7 +5,6 @@ import 'package:dubai_events/activity/events/partial/event.details.partial.dart'
 import 'package:dubai_events/main.dart';
 import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
-import 'package:dubai_events/shared/maps/map.component.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:maps_launcher/maps_launcher.dart';
@@ -43,7 +42,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
 
   @override
   Widget render() {
-    var galleryLength = widget.event.galleryImageUrls.length;
+    var galleryLength = widget.event.galleryImageUrls.length + 1; // +1 for cover image
 
     return ListView(padding: EdgeInsets.zero, children: [
       Container(
@@ -63,7 +62,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                         galleryIndex = index + 1;
                       });
                     }),
-                items: widget.event.galleryImageUrls.map((imageUrl) {
+                items: [widget.event.coverImageUrl, ...widget.event.galleryImageUrls].map((imageUrl) {
                   return Builder(
                     builder: (BuildContext context) {
                       return Container(
@@ -118,13 +117,12 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
       ),
       Container(
           color: Colors.white,
-          padding: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+          padding: const EdgeInsets.only(bottom: 5, left: 10, right: 10),
           child: EventDetailsPartial(event: widget.event)),
-      Container(height: 5, color: Colors.grey.shade100),
       Container(
           color: Colors.white,
           padding:
-          const EdgeInsets.only(top: 15, bottom: 10, left: 10, right: 10),
+          const EdgeInsets.only(top: 10, bottom: 5, left: 10, right: 10),
         child: Text("Description", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade500))
       ),
       Container(
@@ -136,8 +134,34 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
       Container(
         color: Colors.white,
         padding:
-        const EdgeInsets.only(top: 15, bottom: 15, left: 10, right: 10),
+        const EdgeInsets.only(top: 5, bottom: 15, left: 10, right: 10),
         child: Text(widget.event.description, style: TextStyle(color: Colors.grey.shade500)),
+      )
+      ,
+      Container(
+          color: Colors.white,
+          padding:
+          const EdgeInsets.only(bottom: 5, left: 10, right: 10),
+          child: Text("Categories", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade500))
+      ),
+      Container(
+        color: Colors.white,
+        padding: const EdgeInsets.only(bottom: 15, left: 10, right: 10),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(children: [
+            ...widget.event.categories.map((category) => Container(
+              margin: const EdgeInsets.only(right: 5),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                border: Border.all(color: Colors.grey.shade300),
+                color: Colors.white,
+              ),
+              child: Text(category, style: TextStyle(color: Colors.red.shade400, fontSize: 12)),
+            )),
+          ]),
+        ),
       )
       ,
       Container(height: 5, color: Colors.grey.shade100),
@@ -147,16 +171,22 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
           onTap: () {
             launchUrl(Uri.parse(widget.event.reservationUrl));
           },
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-                padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
-                child: Text("Reservations", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade500))
-            ),
-            Container(
-              padding: const EdgeInsets.only(top: 5, bottom: 15, left: 10, right: 10),
-              child: Text(widget.event.reservationUrl, style: TextStyle(color: Colors.grey.shade500)),
-            ),
-          ]),
+          child: Container(
+            margin: const EdgeInsets.only(top: 10, left: 10, bottom: 10, right: 10),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text("Reservations", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                margin: const EdgeInsets.only(right: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade400),
+                ),
+                child: Text("Navigate to URL", style: TextStyle(color: Colors.grey.shade400)),
+              ),
+            ]),
+          ),
         )
       )
       ,
@@ -195,7 +225,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
       )
       ,
       Container(height: 5, color: Colors.grey.shade100),
-      widget.event.eventLocation?.mapImageUrl != null ? Material(
+      widget.event.eventLocation?.mapImageUrl != null && widget.event.eventLocation?.displayLocationMap == true ? Material(
         color: Colors.white,
         child: InkWell(
           onTap: () {
@@ -208,6 +238,10 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
               Container(
                   padding: const EdgeInsets.only(top: 15, bottom: 0, left: 10, right: 10),
                   child: Text("Location", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade500))
+              ),
+              widget.event.eventLocation?.name == null ? Container() : Container(
+                padding: const EdgeInsets.only(top: 5, bottom: 0, left: 10, right: 10),
+                child: Text(widget.event.eventLocation?.name ?? "", style: TextStyle(color: Colors.grey.shade500)),
               ),
               Container(
                 padding: const EdgeInsets.all(10),
@@ -230,6 +264,11 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
           ),
         ),
       ) : Container(),
+      Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(15),
+        child: Text("For more info visit www.engager-cloud.com", style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+      ),
     ]);
   }
 
@@ -244,8 +283,8 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
           child: Row(children: [
             Container(
                 margin: const EdgeInsets.only(right: 10),
-                child: Icon(icon, color: Colors.grey, size: 20)),
-            Text(text ?? "", style: const TextStyle(color: Colors.grey, fontSize: 16)),
+                child: Icon(icon, color: Colors.grey, size: 18)),
+            Text(text ?? "", style: const TextStyle(color: Colors.grey, fontSize: 14)),
           ]),
         ),
       ),

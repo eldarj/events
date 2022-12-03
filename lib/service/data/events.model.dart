@@ -12,8 +12,8 @@ class EventModel {
   String coverImageUrl;
   List<String> galleryImageUrls;
 
-  String eventCreatedTimestamp;
-  String eventTimestamp;
+  int eventCreatedTimestamp;
+  int eventTimestamp;
 
   double ticketPrice;
   String reservationUrl;
@@ -64,8 +64,8 @@ class EventModel {
       parsedJson['description'] as String,
       parsedJson['coverImageUrl'] as String,
       List<String>.from(parsedJson['galleryImageUrls'] as List),
-      parsedJson['eventCreatedTimestamp'] as String,
-      parsedJson['eventTimestamp'] as String,
+      parsedJson['eventCreatedTimestamp'] as int,
+      parsedJson['eventTimestamp'] as int,
       parsedJson['ticketPrice'] as double,
       parsedJson['reservationUrl'] as String,
       List<String>.from(parsedJson['categories'] as List),

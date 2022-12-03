@@ -12,7 +12,7 @@ class ActivityTitleComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(12.5, 20, 10, 20),
+      margin: const EdgeInsets.fromLTRB(12.5, 20, 10, 15),
       alignment: Alignment.bottomLeft,
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Text(title,
