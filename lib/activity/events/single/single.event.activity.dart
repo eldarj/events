@@ -157,17 +157,6 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
           ),
         ),
       ) : Container(),
-      Container(
-        padding: const EdgeInsets.all(15),
-        height: deviceMediaSize.width - 50,
-        width: deviceMediaSize.width - 50,
-        color: Colors.white,
-        child: AbsorbPointer(
-          child: MapComponent(
-              latitude: widget.event.eventLocation?.latitude ?? 0,
-              longitude: widget.event.eventLocation?.longitude ?? 0),
-        ),
-      ),
     ]);
   }
 }
