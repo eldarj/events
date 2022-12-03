@@ -89,15 +89,15 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
               galleryLength > 0
                   ? Container(
                       padding:
-                          EdgeInsets.symmetric(vertical: 2.5, horizontal: 7.5),
-                      margin: EdgeInsets.only(bottom: 5),
+                          const EdgeInsets.symmetric(vertical: 2.5, horizontal: 7.5),
+                      margin: const EdgeInsets.only(bottom: 5),
                       decoration: BoxDecoration(
-                        color: Colors.white12,
+                        color: Colors.black54,
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Text('$galleryIndex/$galleryLength',
                           style:
-                              TextStyle(color: Colors.white70, fontSize: 12)))
+                              const TextStyle(color: Colors.white70, fontSize: 14)))
                   : Container(),
             ],
           )),

@@ -1,9 +1,6 @@
-import 'package:dubai_events/shared/dialog/generic-alert.dialog.dart';
-import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shake/shake.dart';
 
 import 'activity/events/overview/events.overview.activity.dart';
 
@@ -17,8 +14,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  bool initialized = false;
-
   MyApp({super.key});
 
   // This widget is the root of your application.
@@ -43,11 +38,6 @@ class MyApp extends StatelessWidget {
           rootContext = context;
           deviceMediaSize = MediaQuery.of(context).size;
           deviceMediaPadding = MediaQuery.of(context).padding;
-
-          if (!initialized) {
-            initialized = true;
-            initializeShakeDetection();
-          }
 
           return const EventsOverviewActivity();
         }),
@@ -84,17 +74,4 @@ class MyApp extends StatelessWidget {
       ),
     ));
   }
-}
-
-initializeShakeDetection() {
-  ShakeDetector.autoStart(onPhoneShake: () {
-    print("SHAAAAKEEED!");
-    showDialog(context: rootContext, builder: (BuildContext context) {
-      return const GenericAlertDialog(
-        title: '🎉 Congrats',
-        message: "You won the Hidden Shaker Award! We'll send you the gift to your inbox shortly.",
-        positiveBtnText: 'Close',
-      );
-    });
-  });
 }
