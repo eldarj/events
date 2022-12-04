@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dubai_events/activity/events/partial/event.actions.partial.dart';
 import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
@@ -54,6 +56,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   int pageNumber = 0;
 
   TextEditingController searchController = TextEditingController();
+
+  bool searchOpacityVisible = false;
 
   initialize() async {
     setState(() {
@@ -171,8 +175,9 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
         .map((cat) => cat.text)
         .toList();
 
+    hideSearchBar();
+
     setState(() {
-      displaySearch = false;
       displayLoader = true;
     });
 
@@ -202,11 +207,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                       contentPadding: EdgeInsets.only(left: 20, right: 20, top: 4, bottom: 0)),
                 )),
             InkWell(
-                onTap: () {
-                  setState(() {
-                    displaySearch = false;
-                  });
-                },
+                onTap: hideSearchBar,
                 child: Container(
                     height: 35, width: 35,
                     child: Icon(Icons.close_rounded, color: Colors.grey.shade600))),
@@ -216,29 +217,58 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   }
 
   Widget buildTitleSearch() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [Shadows.bottomShadow(color: Colors.black26, blurRadius: 5, topDistance: 2)]
-      ),
-      padding: const EdgeInsets.only(left: 10, right: 10),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildSearchField(),
-          Container(height: 1, color: Colors.grey.shade100),
-          Container(
-            margin: EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
-            child: Text("Filter by categories", style: TextStyle(color: Colors.grey))
-          ),
-          Container(
+    return AnimatedOpacity(
+      duration: Duration(milliseconds: 200),
+      opacity: searchOpacityVisible ? 1.0 : 0.0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [Shadows.bottomShadow(color: Colors.black26, blurRadius: 5, topDistance: 2)]
+        ),
+        padding: const EdgeInsets.only(left: 10, right: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildSearchField(),
+            Container(height: 1, color: Colors.grey.shade100),
+            Container(
+              margin: EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
+              child: Text("Filter by categories", style: TextStyle(color: Colors.grey))
+            ),
+            Container(
+                width: deviceMediaSize.width,
+                child: Wrap(
+                  spacing: 5,
+                  runSpacing: 5,
+                  children: [
+                    ...buildCategoryFilterWidgets(),
+                    TextButton(
+                        style: TextButton.styleFrom(
+                            minimumSize: Size(80, 35),
+                            foregroundColor: Colors.grey,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            for (var cat in categories) {cat.selected = false; }
+                          });
+                        },
+                        child: Text("Clear Filter"))
+                  ],
+                )
+            ),
+            Container(
+                margin: EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
+                child: Text("Filter by date", style: TextStyle(color: Colors.grey))
+            ),
+            Container(
               width: deviceMediaSize.width,
               child: Wrap(
                 spacing: 5,
                 runSpacing: 5,
                 children: [
-                  ...buildCategoryFilterWidgets(),
+                  ...buildDateFilterWidgets(),
                   TextButton(
                       style: TextButton.styleFrom(
                           minimumSize: Size(80, 35),
@@ -247,90 +277,66 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                       ),
                       onPressed: () {
                         setState(() {
-                          for (var cat in categories) {cat.selected = false; }
+                          for (var date in dateFilters) {date.selected = false; }
                         });
                       },
                       child: Text("Clear Filter"))
                 ],
               )
-          ),
-          Container(
-              margin: EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
-              child: Text("Filter by date", style: TextStyle(color: Colors.grey))
-          ),
-          Container(
-            width: deviceMediaSize.width,
-            child: Wrap(
-              spacing: 5,
-              runSpacing: 5,
-              children: [
-                ...buildDateFilterWidgets(),
-                TextButton(
-                    style: TextButton.styleFrom(
-                        minimumSize: Size(80, 35),
-                        foregroundColor: Colors.grey,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        for (var date in dateFilters) {date.selected = false; }
-                      });
-                    },
-                    child: Text("Clear Filter"))
-              ],
-            )
-          ),
-          Container(
-              margin: EdgeInsets.only(top: 15, bottom: 10),
-              height: 1, color: Colors.grey.shade100),
-          Container(
-            margin: EdgeInsets.only(bottom: 10),
-            alignment: Alignment.center,
-            child: TextButton(
-                onPressed: onDoSearch,
-                style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(Size(250, 35)),
-                  backgroundColor: MaterialStateProperty.all(Colors.red.shade400),
-                  foregroundColor: MaterialStateProperty.all(Colors.white),
-                  shape: MaterialStateProperty.all<OutlinedBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      side: BorderSide(width: 1.0, color: Colors.red)),
-                )),
-                child: Text("Search"))
-          ),
-        ],
-      )
+            ),
+            Container(
+                margin: EdgeInsets.only(top: 15, bottom: 10),
+                height: 1, color: Colors.grey.shade100),
+            Container(
+              margin: EdgeInsets.only(bottom: 10),
+              alignment: Alignment.center,
+              child: TextButton(
+                  onPressed: onDoSearch,
+                  style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all(Size(250, 35)),
+                    backgroundColor: MaterialStateProperty.all(Colors.red.shade400),
+                    foregroundColor: MaterialStateProperty.all(Colors.white),
+                    shape: MaterialStateProperty.all<OutlinedBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        side: BorderSide(width: 1.0, color: Colors.red)),
+                  )),
+                  child: Text("Search"))
+            ),
+          ],
+        )
+      ),
     );
   }
 
   Widget buildActivityTitle() {
     return ActivityTitleComponent(
         leading: Container(
-          width: 30,
-          height: 30,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.red.shade400, width: 1),
-            borderRadius: BorderRadius.circular(100),
-            color: Colors.red,
-          ),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 2.5),
-            child: const Text("@",
-                style: TextStyle(fontSize: 20, color: Colors.white)),
-          ),
+          child: Image.asset('static/image/company/events-logo.png', width: 35, height: 35),
         ),
         title: "Upcoming Events",
         actionWidget: InkWell(
-            onTap: () {
-              setState(() {
-                displaySearch = true;
-              });
-            },
+            onTap: showSearchBar,
             child: Container(
                 height: 35, width: 35,
                 child: Icon(Icons.search, color: Colors.grey.shade600))));
+  }
+
+  void showSearchBar() async {
+    setState(() {
+      displaySearch = true;
+    });
+    await Future.delayed(Duration(milliseconds: 1));
+    setState(() {
+      searchOpacityVisible = true;
+    });
+  }
+
+  void hideSearchBar() {
+    setState(() {
+      displaySearch = false;
+      searchOpacityVisible = false;
+    });
   }
 
   Widget buildSingleEventRow(EventModel event) {
