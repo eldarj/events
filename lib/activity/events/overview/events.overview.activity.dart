@@ -3,25 +3,25 @@ import 'package:dubai_events/activity/events/partial/event.actions.partial.dart'
 import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
 import 'package:dubai_events/activity/events/single/single.event.activity.dart';
 import 'package:dubai_events/event-bus/menu-events.publisher.dart';
+import 'package:dubai_events/main.dart';
 import 'package:dubai_events/service/client/http.client.dart';
 import 'package:dubai_events/service/client/http.response.extension.dart';
 import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/shared/activity-title/activity.title.component.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
+import 'package:dubai_events/shared/global/shadows.values.dart';
 import 'package:dubai_events/shared/info/info.component.dart';
 import 'package:dubai_events/shared/layout/horizontal.line.component.dart';
 import 'package:dubai_events/shared/loader/spinner.component.dart';
 import 'package:dubai_events/util/navigation/navigator.util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-class CategoryFilter {
+class FilterItem {
   String text = '';
   bool selected = false;
 
-  CategoryFilter(this.text);
+  FilterItem(this.text);
 }
 
 class EventsOverviewActivity extends StatefulWidget {
@@ -36,7 +36,17 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   List<EventModel> events = [];
 
-  List<CategoryFilter> categories = [];
+  bool displaySearch = false;
+
+  List<FilterItem> categories = [];
+  List<FilterItem> dateFilters = [
+    FilterItem('Today'),
+    FilterItem('Tomorrow'),
+    FilterItem('This Week'),
+    FilterItem('Next Week'),
+    FilterItem('This Month'),
+    FilterItem('Next Month'),
+  ];
 
   int totalItemsLoaded = 0;
   bool isLoadingOnScroll = false;
@@ -45,87 +55,12 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   TextEditingController searchController = TextEditingController();
 
-  void onSearch() {
-
-  }
-
-  onMenuItemPressedEvent(MenuItemType type) {
-    if (type == MenuItemType.SEARCH) {
-      showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50.0),
-          ),
-          builder: (BuildContext context) {
-            return Container(
-              height: MediaQuery.of(context).size.height - 100,
-              color: Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                      color: Colors.white,
-                      margin: EdgeInsets.only(top: 10, left: 5, right: 5, bottom: 10),
-                      height: 50,
-                      child: TextField(
-                        controller: searchController,
-                        textInputAction: TextInputAction.search,
-                        keyboardType: TextInputType.text,
-                        onSubmitted: (_) => onSearch(),
-                        decoration: InputDecoration(
-                            hintText: '',
-                            prefixIcon: Icon(Icons.search),
-                            labelText: 'Search by name',
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(width: 0.25, color: Colors.grey.shade800),
-                            ),
-                            contentPadding: EdgeInsets.only(left: 20, right: 20, top: 0, bottom: 15)),
-                      ))
-                  ,
-                  Container(
-                    padding: EdgeInsets.only(left: 10, right: 10),
-                    child: Wrap(
-                      spacing: 5,
-                      runSpacing: 5,
-                      children: [
-                        ...buildCategoryFilterWidget()
-                      ],
-                    )
-                  )
-                ],
-              ),
-            );
-          }
-      );
-    }
-  }
-
-  List<Widget> buildCategoryFilterWidget() {
-    List<Widget> widgets = [];
-
-    for (var category in categories) {
-      widgets.add(Container(
-          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50),
-              color: category.selected ? Colors.red.shade400 : Colors.transparent,
-              border: Border.all(color: category.selected ? Colors.red.shade400 : Colors.grey.shade400)
-          ),
-          child: Text(category.text, style: TextStyle(color: category.selected ? Colors.white : Colors.grey.shade400))
-      ));
-    }
-
-    return widgets;
-  }
-
   initialize() async {
     setState(() {
       displayLoader = true;
     });
 
-    menuEventsPublisher.onMenuItemPressed(STREAMS_LISTENER_ID, onMenuItemPressedEvent);
+    // menuEventsPublisher.onMenuItemPressed(STREAMS_LISTENER_ID, onSearchMenuOpen);
 
     doGetCategories().then(onGetCategoriesSuccess, onError: onGetCategoriesError);
 
@@ -162,16 +97,22 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
       if (!isError) {
         widget = Container(
           color: Colors.white,
-          child: Column(
+          child: Stack(
+            alignment: Alignment.topLeft,
             children: [
-              events.isNotEmpty
-                  ? buildListView()
-                  : Container(
-                      margin: const EdgeInsets.all(25),
-                      child: const Text('No events to display',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey)),
-                    )
+              Column(
+                children: [
+                  events.isNotEmpty
+                      ? buildListView()
+                      : Container(
+                          margin: const EdgeInsets.all(25),
+                          child: const Text('No events to display',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.grey)),
+                        ),
+                ],
+              ),
+              displaySearch ? buildTitleSearch() : Container(),
             ],
           ),
         );
@@ -206,23 +147,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
           itemCount: events.length + 2,
           itemBuilder: (context, index) {
             if (index == 0) {
-              return ActivityTitleComponent(
-                  title: "Upcoming Events",
-                  actionWidget: Container(
-                    width: 30,
-                    height: 30,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.red.shade400, width: 1),
-                      borderRadius: BorderRadius.circular(100),
-                      color: Colors.red,
-                    ),
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 2.5),
-                      child: const Text("@",
-                          style: TextStyle(fontSize: 20, color: Colors.white)),
-                    ),
-                  ));
+              return buildActivityTitle();
             }
 
             if (index == events.length + 1) {
@@ -239,6 +164,173 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
         ),
       ),
     );
+  }
+
+  void onDoSearch() {
+    var filterCategories = categories.where((element) => element.selected)
+        .map((cat) => cat.text)
+        .toList();
+
+    setState(() {
+      displaySearch = false;
+      displayLoader = true;
+    });
+
+    doGetEvents(clearItems: true, search: searchController.text, categories: filterCategories)
+        .then(onGetEventsSuccess, onError: onGetEventsError);
+  }
+
+  Widget buildSearchField() {
+    return Container(
+      height: 55,
+      margin: EdgeInsets.only(top: deviceMediaPadding.top),
+      child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+                child: TextField(
+                  controller: searchController,
+                  textInputAction: TextInputAction.search,
+                  keyboardType: TextInputType.text,
+                  onSubmitted: (_) => onDoSearch(),
+                  decoration: const InputDecoration(
+                      hintText: 'Search by name',
+                      labelText: 'Search by name',
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.only(left: 20, right: 20, top: 4, bottom: 0)),
+                )),
+            InkWell(
+                onTap: () {
+                  setState(() {
+                    displaySearch = false;
+                  });
+                },
+                child: Container(
+                    height: 35, width: 35,
+                    child: Icon(Icons.close_rounded, color: Colors.grey.shade600))),
+          ]
+      ),
+    );
+  }
+
+  Widget buildTitleSearch() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [Shadows.bottomShadow(color: Colors.black26, blurRadius: 5, topDistance: 2)]
+      ),
+      padding: const EdgeInsets.only(left: 10, right: 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildSearchField(),
+          Container(height: 1, color: Colors.grey.shade100),
+          Container(
+            margin: EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
+            child: Text("Filter by categories", style: TextStyle(color: Colors.grey))
+          ),
+          Container(
+              width: deviceMediaSize.width,
+              child: Wrap(
+                spacing: 5,
+                runSpacing: 5,
+                children: [
+                  ...buildCategoryFilterWidgets(),
+                  TextButton(
+                      style: TextButton.styleFrom(
+                          minimumSize: Size(80, 35),
+                          foregroundColor: Colors.grey,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          for (var cat in categories) {cat.selected = false; }
+                        });
+                      },
+                      child: Text("Clear Filter"))
+                ],
+              )
+          ),
+          Container(
+              margin: EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
+              child: Text("Filter by date", style: TextStyle(color: Colors.grey))
+          ),
+          Container(
+            width: deviceMediaSize.width,
+            child: Wrap(
+              spacing: 5,
+              runSpacing: 5,
+              children: [
+                ...buildDateFilterWidgets(),
+                TextButton(
+                    style: TextButton.styleFrom(
+                        minimumSize: Size(80, 35),
+                        foregroundColor: Colors.grey,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        for (var date in dateFilters) {date.selected = false; }
+                      });
+                    },
+                    child: Text("Clear Filter"))
+              ],
+            )
+          ),
+          Container(
+              margin: EdgeInsets.only(top: 15, bottom: 10),
+              height: 1, color: Colors.grey.shade100),
+          Container(
+            margin: EdgeInsets.only(bottom: 10),
+            alignment: Alignment.center,
+            child: TextButton(
+                onPressed: onDoSearch,
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(Size(250, 35)),
+                  backgroundColor: MaterialStateProperty.all(Colors.red.shade400),
+                  foregroundColor: MaterialStateProperty.all(Colors.white),
+                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                      side: BorderSide(width: 1.0, color: Colors.red)),
+                )),
+                child: Text("Search"))
+          ),
+        ],
+      )
+    );
+  }
+
+  Widget buildActivityTitle() {
+    return ActivityTitleComponent(
+        leading: Container(
+          width: 30,
+          height: 30,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.red.shade400, width: 1),
+            borderRadius: BorderRadius.circular(100),
+            color: Colors.red,
+          ),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 2.5),
+            child: const Text("@",
+                style: TextStyle(fontSize: 20, color: Colors.white)),
+          ),
+        ),
+        title: "Upcoming Events",
+        actionWidget: InkWell(
+            onTap: () {
+              setState(() {
+                displaySearch = true;
+              });
+            },
+            child: Container(
+                height: 35, width: 35,
+                child: Icon(Icons.search, color: Colors.grey.shade600))));
   }
 
   Widget buildSingleEventRow(EventModel event) {
@@ -264,8 +356,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                   event: event, prebuiltImageWidget: eventImageWidget));
         },
         child: Container(
-          padding:
-              const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+          padding: const EdgeInsets.only(left: 10, right: 10, bottom: 5),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             ClipRRect(
@@ -304,6 +395,53 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     );
   }
 
+  Widget buildFilterItemWidget(item) {
+    return Material(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(150)),
+      child: InkWell(
+        customBorder: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(150)),
+        splashColor: Colors.grey,
+        focusColor: Colors.grey,
+        onTap: () {
+          setState(() {
+            item.selected = !item.selected;
+          });
+        },
+        child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: item.selected ? Colors.white : Colors.transparent,
+                border: Border.all(color: item.selected ? Colors.red.shade400 : Colors.grey.shade400)
+            ),
+            child: Text(item.text, style: TextStyle(color: item.selected ? Colors.red.shade400 : Colors.grey.shade400))
+        ),
+      ),
+    );
+  }
+
+  List<Widget> buildDateFilterWidgets() {
+    List<Widget> widgets = [];
+
+    for (var filter in dateFilters) {
+      widgets.add(buildFilterItemWidget(filter));
+    }
+
+    return widgets;
+  }
+  
+  List<Widget> buildCategoryFilterWidgets() {
+    List<Widget> widgets = [];
+
+    for (var category in categories) {
+      widgets.add(buildFilterItemWidget(category));
+    }
+
+    return widgets;
+  }
+
   // Data calls
   void getNextPageOnScroll() async {
     if (!isLoadingOnScroll && !noMoreItemsToLoad) {
@@ -327,17 +465,12 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
       throw Exception();
     }
 
-    print(response);
-    print(response?.statusCode);
-
     return response?.decode();
   }
 
   void onGetCategoriesSuccess(result) async {
-    print('GOT CATS');
-    print(result);
     for (var element in result) {
-      categories.add(CategoryFilter(element));
+      categories.add(FilterItem(element));
     }
   }
 
@@ -346,13 +479,22 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   }
 
   // Data calls - Get Events
-  Future doGetEvents({page = 0, clearItems = false}) async {
+  Future doGetEvents({page = 0, clearItems = false, String? search, List<String>? categories}) async {
     if (clearItems) {
       events.clear();
       pageNumber = 0;
     }
 
     String url = "/api/events/upcoming?page=$page";
+
+    if (search != null) {
+      url = "$url&search=$search";
+    }
+
+    if (categories != null) {
+      url = "$url&categories=${categories.join(",")}";
+    }
+
     http.Response? response = await HttpClient.get(url);
 
     await Future.delayed(const Duration(milliseconds: 500));

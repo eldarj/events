@@ -112,10 +112,11 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
       Container(height: 5, color: Colors.grey.shade100),
       Container(
         color: Colors.white,
-        padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+        padding: const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 5),
         child: Text(widget.event.name,
             style: const TextStyle(
-                fontSize: 16,
+                fontSize: 24,
+                fontFamily: "Ubuntu",
                 fontWeight: FontWeight.bold,
                 color: Colors.black87)),
       ),
@@ -127,12 +128,13 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
           color: Colors.white,
           padding:
           const EdgeInsets.only(top: 10, bottom: 5, left: 10, right: 10),
-        child: Text("Description", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade700))
+        child: Text("Description", style: TextStyle(
+            fontWeight: FontWeight.bold, color: Colors.grey.shade700))
       ),
       Container(
         color: Colors.white,
         padding:
-            const EdgeInsets.only(left: 10, right: 10),
+            const EdgeInsets.only(left: 10, right: 10, bottom: 5),
         child: Text(widget.event.shortDescription, style: TextStyle(color: Colors.grey.shade700)),
       ),
       Container(
