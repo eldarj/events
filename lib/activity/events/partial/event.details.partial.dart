@@ -36,7 +36,7 @@ class EventDetailsPartial extends StatelessWidget {
           child:
               Icon(CupertinoIcons.tickets, color: Colors.grey.shade700, size: 14),
         ),
-        Text(event.ticketPrice > 0 ? "${event.ticketPrice} AED" : "Free of Charge",
+        Text(event.ticketPrice > 0 ? "${event.ticketPrice} AED" : "Free",
             style: TextStyle(color: Colors.grey.shade700)),
       ])
     ]);

@@ -203,7 +203,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
               child: Text("Contact", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade700))
           ),
           Container(
-            padding: const EdgeInsets.only(top: 5, bottom: 15),
+            padding: const EdgeInsets.only(top: 5, bottom: 0),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               contactTile(Icons.phone, widget.event.eventContact?.phoneNumber, () {
                 launchUrl(Uri(scheme: "tel", path: widget.event.eventContact?.phoneNumber ?? ""));
@@ -235,9 +235,8 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
           color: Colors.white,
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(25),
-            bottomRight: Radius.circular(25),
-          ),
-            boxShadow: [Shadows.bottomShadow()]
+            bottomRight: Radius.circular(25)),
+          boxShadow: [Shadows.bottomShadow()]
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,12 +332,17 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
   }
 
 
-  Widget contactTile(icon, text, onTap) {
+  Widget contactTile(icon, text, onTap, {bool showBottomBorder = true}) {
     return text != null && text.length > 0 ? Material(
       color: Colors.white,
       child: InkWell(
         onTap: onTap,
         child: Container(
+          decoration: BoxDecoration(
+              border: Border(
+                  bottom: BorderSide(color: showBottomBorder ? Colors.grey.shade200 : Colors.transparent)
+              )
+          ),
           padding: const EdgeInsets.only(top: 10, bottom: 10, right: 10, left: 10),
           child: Row(children: [
             Container(
