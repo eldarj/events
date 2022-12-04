@@ -12,7 +12,7 @@ class EventDetailsPartial extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Container(
-        margin: const EdgeInsets.only(top: 2.5, bottom: 2.5),
+        margin: const EdgeInsets.only(top: 5, bottom: 2.5),
         child: Row(children: [
           Container(
             margin: const EdgeInsets.only(right: 5),
@@ -21,7 +21,10 @@ class EventDetailsPartial extends StatelessWidget {
           Row(children: [
             Text("${event.eventLocation?.name}",
                 style: const TextStyle(color: Colors.grey)),
-            Text(", ${HumanTimes.getDate(event.eventTimestamp)}",
+            Container(
+                margin: const EdgeInsets.only(left: 10, right: 5),
+                child: Icon(Icons.watch_later_outlined, color: Colors.grey.shade400, size: 14)),
+            Text(HumanTimes.getDate(event.eventTimestamp),
                 style: const TextStyle(color: Colors.grey))
           ])
         ]),
@@ -33,7 +36,7 @@ class EventDetailsPartial extends StatelessWidget {
           child:
               Icon(CupertinoIcons.tickets, color: Colors.grey.shade400, size: 14),
         ),
-        Text("${event.ticketPrice} AED",
+        Text(event.ticketPrice > 0 ? "${event.ticketPrice} AED" : "Free of Charge",
             style: const TextStyle(color: Colors.grey)),
       ])
     ]);

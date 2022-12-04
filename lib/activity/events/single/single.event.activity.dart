@@ -5,8 +5,11 @@ import 'package:dubai_events/activity/events/partial/event.details.partial.dart'
 import 'package:dubai_events/main.dart';
 import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
+import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -146,7 +149,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
       ),
       Container(
         color: Colors.white,
-        padding: const EdgeInsets.only(bottom: 15, left: 10, right: 10),
+        padding: const EdgeInsets.only(bottom: 15, left: 7.5, right: 10),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(children: [
@@ -181,9 +184,9 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(50),
                   color: Colors.white,
-                  border: Border.all(color: Colors.grey.shade400),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
-                child: Text("Navigate to URL", style: TextStyle(color: Colors.grey.shade400)),
+                child: Text("Navigate to URL", style: TextStyle(color: Colors.red.shade400)),
               ),
             ]),
           ),
@@ -213,10 +216,10 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
               contactTile(Icons.facebook_rounded, widget.event.eventContact?.facebookUrl, () {
                 launchUrl(Uri.parse(widget.event.eventContact?.facebookUrl ?? ""));
               }),
-              contactTile(Icons.info_outline, widget.event.eventContact?.twitterUrl, () {
+              contactTile(FontAwesomeIcons.twitter, widget.event.eventContact?.twitterUrl, () {
                 launchUrl(Uri.parse(widget.event.eventContact?.twitterUrl ?? ""));
               }),
-              contactTile(Icons.info_outline, widget.event.eventContact?.instagramUrl, () {
+              contactTile(FontAwesomeIcons.instagram, widget.event.eventContact?.instagramUrl, () {
                 launchUrl(Uri.parse(widget.event.eventContact?.instagramUrl ?? ""));
               }),
             ]),
@@ -225,26 +228,66 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
       )
       ,
       Container(height: 5, color: Colors.grey.shade100),
-      widget.event.eventLocation?.mapImageUrl != null && widget.event.eventLocation?.displayLocationMap == true ? Material(
+      widget.event.eventLocation?.mapImageUrl != null && widget.event.eventLocation?.displayLocationMap == true ? Container(
         color: Colors.white,
-        child: InkWell(
-          onTap: () {
-            MapsLauncher.launchCoordinates(widget.event.eventLocation?.latitude ?? 0,
-                widget.event.eventLocation?.longitude ?? 0, widget.event.eventLocation?.name);
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                  padding: const EdgeInsets.only(top: 15, bottom: 0, left: 10, right: 10),
-                  child: Text("Location", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade500))
-              ),
-              widget.event.eventLocation?.name == null ? Container() : Container(
-                padding: const EdgeInsets.only(top: 5, bottom: 0, left: 10, right: 10),
-                child: Text(widget.event.eventLocation?.name ?? "", style: TextStyle(color: Colors.grey.shade500)),
-              ),
-              Container(
-                padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+                padding: const EdgeInsets.only(top: 15, bottom: 0, left: 10, right: 10),
+                child: Text("Location", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade500))
+            ),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  widget.event.eventLocation?.name == null ? Container() : Container(
+                    padding: const EdgeInsets.only(top: 5, bottom: 10, left: 10, right: 10),
+                    child: Material(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(150)),
+                        color: Colors.white,
+                        child: InkWell(
+                          onTap: () {
+                            copyToClipBoard();
+                            SnackbarHandler.show(context, text: 'Successfully copied to clipboard',
+                                textColor: Colors.grey.shade700, icon: Icon(
+                                Icons.check_box_outlined, color: Colors.green.shade300
+                            ));
+                          },
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [
+                            Container(
+                                margin: const EdgeInsets.only(right: 15),
+                                child: Text(widget.event.eventLocation?.name ?? "",
+                                    style: const TextStyle(color: Colors.grey))),
+                            Icon(Icons.copy, size: 16, color: Colors.red.shade400,)
+                          ]),
+                        )),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(right: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    child: Material(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(150)),
+                      color: Colors.white,
+                      child: InkWell(
+                        onTap: () {
+                          MapsLauncher.launchCoordinates(widget.event.eventLocation?.latitude ?? 0,
+                              widget.event.eventLocation?.longitude ?? 0, widget.event.eventLocation?.name);
+                        },
+                        child: Text("View on Map", style: TextStyle(color: Colors.red.shade400)),
+                      ),
+                    ),
+                  )
+                ]
+            ),
+            InkWell(
+              onTap: () {
+                MapsLauncher.launchCoordinates(widget.event.eventLocation?.latitude ?? 0,
+                    widget.event.eventLocation?.longitude ?? 0, widget.event.eventLocation?.name);
+              },
+              child: Container(
+                padding: const EdgeInsets.only(top: 0, bottom: 10, left: 10, right: 10),
                 width: deviceMediaSize.width - 5,
                 child: CachedNetworkImage(
                   fit: BoxFit.cover,
@@ -257,11 +300,13 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                       child: const CircularProgressIndicator(
                           color: Colors.redAccent)),
                   errorWidget: (context, url, error) =>
-                  const Icon(Icons.broken_image_outlined, color: Colors.grey),
+                  Container(
+                      margin: const EdgeInsets.only(top: 50, bottom: 50),
+                      child: const Icon(Icons.broken_image_outlined, color: Colors.grey)),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ) : Container(),
       Container(
@@ -289,5 +334,9 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
         ),
       ),
     ) : Container();
+  }
+
+  void copyToClipBoard() async {
+    await Clipboard.setData(ClipboardData(text: widget.event.eventLocation?.name));
   }
 }

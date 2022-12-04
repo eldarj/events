@@ -51,6 +51,7 @@ dependencies:
   maps_launcher: ^2.0.1
   anim_search_bar: ^2.0.2
   url_launcher: ^6.1.7
+  font_awesome_flutter: ^10.2.1
 
 dev_dependencies:
   flutter_test:

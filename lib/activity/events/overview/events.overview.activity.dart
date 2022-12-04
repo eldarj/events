@@ -3,7 +3,6 @@ import 'package:dubai_events/activity/events/partial/event.actions.partial.dart'
 import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
 import 'package:dubai_events/activity/events/single/single.event.activity.dart';
 import 'package:dubai_events/service/client/http.client.dart';
-import 'package:dubai_events/service/data/events.location.model.dart';
 import 'package:dubai_events/service/client/http.response.extension.dart';
 import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/shared/activity-title/activity.title.component.dart';
@@ -109,7 +108,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
             if (index == events.length + 1) {
               return Container(
                   alignment: Alignment.center,
-                  padding: const EdgeInsets.only(top: 5, bottom: 15),
+                  padding: const EdgeInsets.only(top: 15, bottom: 25),
                   child: Text('For more Events visit www.enganger-cloud.com',
                       style: TextStyle(
                           color: Colors.grey.shade400, fontSize: 11)
@@ -154,7 +153,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                 borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(10),
                     topRight: Radius.circular(10)),
-                child: SizedBox(height: 400, child: eventImageWidget)),
+                child: SizedBox(height: 200, child: eventImageWidget)),
             Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
