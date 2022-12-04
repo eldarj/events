@@ -38,7 +38,12 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   List<EventModel> events = [];
 
-  bool displaySearch = false;
+  // Filtering
+  bool displaySearchBar = false;
+  bool searchOpacityVisible = false;
+  bool searchLoading = false;
+
+  TextEditingController searchController = TextEditingController();
 
   List<FilterItem> categories = [];
   List<FilterItem> dateFilters = [
@@ -50,21 +55,16 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     FilterItem('Next Month'),
   ];
 
+  // Loading on scroll
   int totalItemsLoaded = 0;
   bool isLoadingOnScroll = false;
   bool noMoreItemsToLoad = false;
   int pageNumber = 0;
-
-  TextEditingController searchController = TextEditingController();
-
-  bool searchOpacityVisible = false;
-
+  
   initialize() async {
     setState(() {
       displayLoader = true;
     });
-
-    // menuEventsPublisher.onMenuItemPressed(STREAMS_LISTENER_ID, onSearchMenuOpen);
 
     doGetCategories().then(onGetCategoriesSuccess, onError: onGetCategoriesError);
 
@@ -106,17 +106,27 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
             children: [
               Column(
                 children: [
-                  events.isNotEmpty
-                      ? buildListView()
-                      : Container(
-                          margin: const EdgeInsets.all(25),
-                          child: const Text('No events to display',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.grey)),
-                        ),
+                  buildListView(),
                 ],
               ),
-              displaySearch ? buildTitleSearch() : Container(),
+              displaySearchBar ? buildTitleSearch() : Container(),
+              searchLoading ? buildSearchLoadingWidget() : Container(),
+              isLoadingOnScroll ? Container(
+                alignment: Alignment.bottomCenter,
+                margin: const EdgeInsets.only(bottom: 25),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade200),
+                    borderRadius: BorderRadius.circular(100),
+                    color: Colors.white,
+                  ),
+                  child: SpinnerComponent(
+                      strokeWidth: 4,
+                      size: 30,
+                      color: Colors.grey.shade400),
+                )
+              ) : Container()
             ],
           ),
         );
@@ -175,10 +185,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
         .map((cat) => cat.text)
         .toList();
 
-    hideSearchBar();
-
     setState(() {
-      displayLoader = true;
+      searchLoading = true;
     });
 
     doGetEvents(clearItems: true, search: searchController.text, categories: filterCategories)
@@ -214,6 +222,12 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
           ]
       ),
     );
+  }
+
+  Widget buildSearchLoadingWidget() {
+    return Container(
+        color: Colors.white70,
+        child: Container());
   }
 
   Widget buildTitleSearch() {
@@ -301,7 +315,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                         borderRadius: BorderRadius.circular(50),
                         side: BorderSide(width: 1.0, color: Colors.red)),
                   )),
-                  child: Text("Search"))
+                  child: searchLoading ? SpinnerComponent(size: 20, strokeWidth: 2, color: Colors.white) : Text("Search"))
             ),
           ],
         )
@@ -324,7 +338,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   void showSearchBar() async {
     setState(() {
-      displaySearch = true;
+      displaySearchBar = true;
     });
     await Future.delayed(Duration(milliseconds: 1));
     setState(() {
@@ -334,7 +348,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   void hideSearchBar() {
     setState(() {
-      displaySearch = false;
+      displaySearchBar = false;
+      searchLoading = false;
       searchOpacityVisible = false;
     });
   }
@@ -487,7 +502,6 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   // Data calls - Get Events
   Future doGetEvents({page = 0, clearItems = false, String? search, List<String>? categories}) async {
     if (clearItems) {
-      events.clear();
       pageNumber = 0;
     }
 
@@ -511,18 +525,24 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
     dynamic result = response?.decode();
 
-    return result;
+    return {'result': result, 'clearItems': clearItems};
   }
 
-  void onGetEventsSuccess(result) async {
-    totalItemsLoaded += (result['totalElements'] as int);
+  void onGetEventsSuccess(obj) async {
+    if (obj['clearItems']) {
+      events.clear();
+      totalItemsLoaded = 0;
+    }
 
-    if (result['totalElements'] == 0) {
+    totalItemsLoaded += (obj['result']['totalElements'] as int);
+
+    if (obj['result']['totalElements'] == 0) {
       noMoreItemsToLoad = true;
     }
 
-    events.addAll(EventModel.fromJsonList(result['content']));
+    events.addAll(EventModel.fromJsonList(obj['result']['content']));
 
+    hideSearchBar();
     setState(() {
       displayLoader = false;
       isLoadingOnScroll = false;
@@ -531,6 +551,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   }
 
   void onGetEventsError(Object error) async {
+    hideSearchBar();
     setState(() {
       displayLoader = false;
       isLoadingOnScroll = false;
