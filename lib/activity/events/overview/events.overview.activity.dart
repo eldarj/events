@@ -34,7 +34,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
       displayLoader = true;
     });
 
-    doGetEvents(page: pageNumber).then(onGetEventsSuccess, onError: onGetEventsError);
+    doGetEvents(page: pageNumber)
+        .then(onGetEventsSuccess, onError: onGetEventsError);
   }
 
   @override
@@ -88,7 +89,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   Widget buildListView() {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
-        if (!displayLoader && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+        if (!displayLoader &&
+            scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
           getNextPageOnScroll();
         }
 
@@ -101,8 +103,21 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
             if (index == 0) {
               return ActivityTitleComponent(
                   title: "Upcoming Events",
-                  actionWidget: Image.asset('static/image/company/dubai-xs.png',
-                      height: 20));
+                  actionWidget: Container(
+                    width: 30,
+                    height: 30,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.red.shade400, width: 1),
+                      borderRadius: BorderRadius.circular(100),
+                      color: Colors.red,
+                    ),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 2.5),
+                      child: const Text("@",
+                          style: TextStyle(fontSize: 20, color: Colors.white)),
+                    ),
+                  ));
             }
 
             if (index == events.length + 1) {
@@ -111,8 +126,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                   padding: const EdgeInsets.only(top: 15, bottom: 25),
                   child: Text('For more Events visit www.enganger-cloud.com',
                       style: TextStyle(
-                          color: Colors.grey.shade400, fontSize: 11)
-                  ));
+                          color: Colors.grey.shade400, fontSize: 11)));
             }
 
             return buildSingleEventRow(events[index - 1]);
@@ -129,10 +143,10 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
       imageUrl: event.coverImageUrl,
       placeholder: (context, url) => Container(
           alignment: Alignment.center,
-          height: 25,
-          width: 25,
+          height: 25, width: 25,
           child: const CircularProgressIndicator(color: Colors.redAccent)),
-      errorWidget: (context, url, error) => const Icon(Icons.broken_image_outlined, color: Colors.grey),
+      errorWidget: (context, url, error) =>
+          const Icon(Icons.broken_image_outlined, color: Colors.grey),
     );
 
     return Material(
@@ -193,7 +207,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
         isLoadingOnScroll = true;
       });
       pageNumber++;
-      doGetEvents(page: pageNumber).then(onGetEventsSuccess, onError: onGetEventsError);
+      doGetEvents(page: pageNumber)
+          .then(onGetEventsSuccess, onError: onGetEventsError);
     }
   }
 
@@ -208,7 +223,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
     await Future.delayed(const Duration(milliseconds: 500));
 
-    if(response != null && response.statusCode != 200) {
+    if (response != null && response.statusCode != 200) {
       throw Exception();
     }
 
