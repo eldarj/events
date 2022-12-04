@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dubai_events/activity/events/partial/event.actions.partial.dart';
 import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
 import 'package:dubai_events/activity/events/single/single.event.activity.dart';
+import 'package:dubai_events/event-bus/menu-events.publisher.dart';
 import 'package:dubai_events/service/client/http.client.dart';
 import 'package:dubai_events/service/client/http.response.extension.dart';
 import 'package:dubai_events/service/data/events.model.dart';
@@ -12,7 +13,16 @@ import 'package:dubai_events/shared/layout/horizontal.line.component.dart';
 import 'package:dubai_events/shared/loader/spinner.component.dart';
 import 'package:dubai_events/util/navigation/navigator.util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+class CategoryFilter {
+  String text = '';
+  bool selected = false;
+
+  CategoryFilter(this.text);
+}
 
 class EventsOverviewActivity extends StatefulWidget {
   const EventsOverviewActivity({super.key});
@@ -22,17 +32,102 @@ class EventsOverviewActivity extends StatefulWidget {
 }
 
 class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
+  static const String STREAMS_LISTENER_ID = "EventsOverviewActivityState";
+
   List<EventModel> events = [];
+
+  List<CategoryFilter> categories = [];
 
   int totalItemsLoaded = 0;
   bool isLoadingOnScroll = false;
   bool noMoreItemsToLoad = false;
   int pageNumber = 0;
 
+  TextEditingController searchController = TextEditingController();
+
+  void onSearch() {
+
+  }
+
+  onMenuItemPressedEvent(MenuItemType type) {
+    if (type == MenuItemType.SEARCH) {
+      showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(50.0),
+          ),
+          builder: (BuildContext context) {
+            return Container(
+              height: MediaQuery.of(context).size.height - 100,
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                      color: Colors.white,
+                      margin: EdgeInsets.only(top: 10, left: 5, right: 5, bottom: 10),
+                      height: 50,
+                      child: TextField(
+                        controller: searchController,
+                        textInputAction: TextInputAction.search,
+                        keyboardType: TextInputType.text,
+                        onSubmitted: (_) => onSearch(),
+                        decoration: InputDecoration(
+                            hintText: '',
+                            prefixIcon: Icon(Icons.search),
+                            labelText: 'Search by name',
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(width: 0.25, color: Colors.grey.shade800),
+                            ),
+                            contentPadding: EdgeInsets.only(left: 20, right: 20, top: 0, bottom: 15)),
+                      ))
+                  ,
+                  Container(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: Wrap(
+                      spacing: 5,
+                      runSpacing: 5,
+                      children: [
+                        ...buildCategoryFilterWidget()
+                      ],
+                    )
+                  )
+                ],
+              ),
+            );
+          }
+      );
+    }
+  }
+
+  List<Widget> buildCategoryFilterWidget() {
+    List<Widget> widgets = [];
+
+    for (var category in categories) {
+      widgets.add(Container(
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              color: category.selected ? Colors.red.shade400 : Colors.transparent,
+              border: Border.all(color: category.selected ? Colors.red.shade400 : Colors.grey.shade400)
+          ),
+          child: Text(category.text, style: TextStyle(color: category.selected ? Colors.white : Colors.grey.shade400))
+      ));
+    }
+
+    return widgets;
+  }
+
   initialize() async {
     setState(() {
       displayLoader = true;
     });
+
+    menuEventsPublisher.onMenuItemPressed(STREAMS_LISTENER_ID, onMenuItemPressedEvent);
+
+    doGetCategories().then(onGetCategoriesSuccess, onError: onGetCategoriesError);
 
     doGetEvents(page: pageNumber)
         .then(onGetEventsSuccess, onError: onGetEventsError);
@@ -47,6 +142,16 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   @override
   deactivate() {
     super.deactivate();
+
+    if (menuEventsPublisher != null) {
+      menuEventsPublisher.removeListener(STREAMS_LISTENER_ID);
+    }
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -183,15 +288,14 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                           style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black54)),
+                              color: Colors.black87)),
                       EventDetailsPartial(event: event),
                       const HorizontalLine(),
                       Text(
                           event.shortDescription.length > 200
                               ? "${event.shortDescription.substring(0, 200)}..."
                               : event.shortDescription,
-                          style: const TextStyle(
-                              fontSize: 16, color: Colors.black54)),
+                          style: TextStyle(color: Colors.grey.shade700)),
                       EventActionsPartial(event: event, setState: setState)
                     ]))
           ]),
@@ -212,6 +316,36 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     }
   }
 
+  // Data calls - Get category filters
+  Future doGetCategories() async {
+    String url = "/api/categories";
+    http.Response? response = await HttpClient.get(url);
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (response != null && response.statusCode != 200) {
+      throw Exception();
+    }
+
+    print(response);
+    print(response?.statusCode);
+
+    return response?.decode();
+  }
+
+  void onGetCategoriesSuccess(result) async {
+    print('GOT CATS');
+    print(result);
+    for (var element in result) {
+      categories.add(CategoryFilter(element));
+    }
+  }
+
+  void onGetCategoriesError(Object error) async {
+    print('Error fetching categories');
+  }
+
+  // Data calls - Get Events
   Future doGetEvents({page = 0, clearItems = false}) async {
     if (clearItems) {
       events.clear();

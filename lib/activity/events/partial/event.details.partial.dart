@@ -16,16 +16,16 @@ class EventDetailsPartial extends StatelessWidget {
         child: Row(children: [
           Container(
             margin: const EdgeInsets.only(right: 5),
-            child: Icon(CupertinoIcons.map, color: Colors.grey.shade400, size: 14),
+            child: Icon(CupertinoIcons.map, color: Colors.grey.shade700, size: 14),
           ),
           Row(children: [
             Text("${event.eventLocation?.name}",
-                style: const TextStyle(color: Colors.grey)),
+                style: TextStyle(color: Colors.grey.shade700)),
             Container(
                 margin: const EdgeInsets.only(left: 10, right: 5),
-                child: Icon(Icons.watch_later_outlined, color: Colors.grey.shade400, size: 14)),
+                child: Icon(Icons.watch_later_outlined, color: Colors.grey.shade700, size: 14)),
             Text(HumanTimes.getDate(event.eventTimestamp),
-                style: const TextStyle(color: Colors.grey))
+                style: TextStyle(color: Colors.grey.shade700))
           ])
         ]),
       ),
@@ -34,10 +34,10 @@ class EventDetailsPartial extends StatelessWidget {
         Container(
           margin: const EdgeInsets.only(right: 5),
           child:
-              Icon(CupertinoIcons.tickets, color: Colors.grey.shade400, size: 14),
+              Icon(CupertinoIcons.tickets, color: Colors.grey.shade700, size: 14),
         ),
         Text(event.ticketPrice > 0 ? "${event.ticketPrice} AED" : "Free of Charge",
-            style: const TextStyle(color: Colors.grey)),
+            style: TextStyle(color: Colors.grey.shade700)),
       ])
     ]);
   }
