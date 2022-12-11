@@ -1,21 +1,22 @@
 import 'package:dubai_events/util/navigation/navigator.util.dart';
 import 'package:flutter/material.dart';
 
-Widget buildSectionTitle(String sectionTitle) {
+Widget buildSectionTitle(String sectionTitle, { double topMargin = 15.0}) {
   return Container(
-      padding: EdgeInsets.only(top: 15, left: 20),
+      padding: EdgeInsets.only(top: topMargin, left: 20),
       child: Text("$sectionTitle", style: TextStyle(fontSize: 12, color: Colors.grey)));
 }
 
 Widget buildDrawerItem(BuildContext context, String labelName, Widget iconWidget,
     {
-      Widget? activity, Function? onTapFunction, String labelDescription = '', crossAxisAlignment = CrossAxisAlignment.center,
+      Widget? activity, dynamic onTapFunction, String labelDescription = '', crossAxisAlignment = CrossAxisAlignment.center,
       padding = const EdgeInsets.only(top: 10, bottom: 10, left: 20)
     }) {
   return Material(
     color: Colors.white,
     child: InkWell(
-      onTap: () {
+      onTap: onTapFunction ?? () {
+        Navigator.pop(context);
         NavigatorUtil.push(context, activity);
       },
       child: Container(
@@ -28,7 +29,7 @@ Widget buildDrawerItem(BuildContext context, String labelName, Widget iconWidget
                 child: iconWidget),
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(labelName, style: TextStyle(
-                color: Colors.black,
+                color: Colors.grey.shade700,
               )),
               labelDescription != null && labelDescription != '' ? Text(labelDescription, style: TextStyle(
                   fontSize: 12,
