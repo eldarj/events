@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 
 enum MenuItemType {
-  SEARCH,
+  SEARCH, SETTINGS
 }
 
 class MenuEventsPublisher {

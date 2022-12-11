@@ -55,7 +55,10 @@ class MyApp extends StatelessWidget {
             ringWidth: 100,
             ringDiameter: 400,
             children: [
-              fabItem(Icons.more_vert_rounded),
+              fabItem(Icons.settings, onTap: () {
+                globalFabKey.currentState?.close();
+                menuEventsPublisher.emitMenuItemPressed(MenuItemType.SETTINGS);
+              }),
               fabItem(Icons.notifications_none_rounded),
               fabItem(Icons.bookmark_border_rounded),
               fabItem(Icons.search, onTap: () {

@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dubai_events/activity/events/partial/event.actions.partial.dart';
 import 'package:dubai_events/activity/events/partial/event.details.partial.dart';
 import 'package:dubai_events/activity/events/single/single.event.activity.dart';
+import 'package:dubai_events/activity/settings/overview/settings.overview.activity.dart';
 import 'package:dubai_events/event-bus/menu-events.publisher.dart';
 import 'package:dubai_events/main.dart';
 import 'package:dubai_events/service/client/http.client.dart';
@@ -60,12 +61,23 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   bool isLoadingOnScroll = false;
   bool noMoreItemsToLoad = false;
   int pageNumber = 0;
+
+  handleMenuItemPressedEvent(MenuItemType type) {
+    if (type == MenuItemType.SETTINGS) {
+      NavigatorUtil.push(context, SettingsOverviewActivity());
+    } else if (type == MenuItemType.SEARCH) {
+      showSearchBar();
+    }
+  }
+  
   
   initialize() async {
     setState(() {
       displayLoader = true;
     });
 
+    menuEventsPublisher.onMenuItemPressed(STREAMS_LISTENER_ID, handleMenuItemPressedEvent);
+    
     doGetCategories().then(onGetCategoriesSuccess, onError: onGetCategoriesError);
 
     doGetEvents(page: pageNumber)
@@ -95,41 +107,27 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   @override
   Widget render() {
-    Widget widget = const SpinnerComponent();
+    Widget widget = Center(child: const SpinnerComponent());
 
     if (!displayLoader) {
       if (!isError) {
-        widget = Container(
-          color: Colors.white,
-          child: Stack(
-            alignment: Alignment.topLeft,
-            children: [
-              Column(
-                children: [
-                  buildListView(),
-                ],
-              ),
-              displaySearchBar ? buildTitleSearch() : Container(),
-              searchLoading ? buildSearchLoadingWidget() : Container(),
-              isLoadingOnScroll ? Container(
-                alignment: Alignment.bottomCenter,
-                margin: const EdgeInsets.only(bottom: 25),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade200),
-                    borderRadius: BorderRadius.circular(100),
-                    color: Colors.white,
-                  ),
-                  child: SpinnerComponent(
-                      strokeWidth: 4,
-                      size: 30,
-                      color: Colors.grey.shade400),
-                )
-              ) : Container()
-            ],
-          ),
-        );
+          widget = Container(
+            color: Colors.white,
+            child: Stack(
+              alignment: Alignment.topLeft,
+              children: [
+                Column(
+                  children: [
+                    buildListView(),
+                  ],
+                ),
+                displaySearchBar ? buildTitleSearch() : Container(),
+                searchLoading ? buildSearchLoadingWidget() : Container(),
+                isLoadingOnScroll ? buildScrollLoadingWidget() : Container(),
+                isFilteringActive() ? buildClearFilterWidget() : Container()
+              ],
+            ),
+          );
       } else {
         widget = InfoComponent.errorPanda(onButtonPressed: () async {
           setState(() {
@@ -224,6 +222,80 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     );
   }
 
+  bool isFilteringActive() {
+    return searchController.text.isNotEmpty
+      || hasCategoryFilter()
+      || hasDateFilter();
+  }
+
+  bool hasCategoryFilter() {
+    return categories.any((e) => e.selected);
+  }
+
+  bool hasDateFilter() {
+    return dateFilters.any((e) => e.selected);
+  }
+
+
+  clearAllFilters() {
+    setState(() {
+      searchController.text = '';
+      for (var item in categories) {
+        item.selected = false;
+      }
+      for (var item in dateFilters) {
+        item.selected = false;
+      }
+      searchLoading = true;
+    });
+
+    doGetEvents(clearItems: true)
+        .then(onGetEventsSuccess, onError: onGetEventsError);
+  }
+
+  Widget buildClearFilterWidget() {
+    return Container(
+        alignment: Alignment.bottomCenter,
+        margin: const EdgeInsets.only(bottom: 25),
+        child: OutlinedButton(
+          onPressed: clearAllFilters,
+          style: ElevatedButton.styleFrom(
+            shape: const StadiumBorder(),
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.redAccent,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                  margin: EdgeInsets.only(right: 5),
+                  child: Icon(Icons.close_rounded, size: 16)
+              ),
+              const Text('Remove All Filters'),
+            ],
+          ),
+        )    );
+  }
+
+  Widget buildScrollLoadingWidget() {
+    return Container(
+        alignment: Alignment.bottomCenter,
+        margin: const EdgeInsets.only(bottom: 25),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(100),
+            color: Colors.white,
+          ),
+          child: SpinnerComponent(
+              strokeWidth: 4,
+              size: 30,
+              color: Colors.grey.shade400),
+        )
+    );
+  }
+
   Widget buildSearchLoadingWidget() {
     return Container(
         color: Colors.white70,
@@ -257,7 +329,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                   runSpacing: 5,
                   children: [
                     ...buildCategoryFilterWidgets(),
-                    TextButton(
+                    hasCategoryFilter() ? TextButton(
                         style: TextButton.styleFrom(
                             minimumSize: Size(80, 35),
                             foregroundColor: Colors.grey,
@@ -267,8 +339,9 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                           setState(() {
                             for (var cat in categories) {cat.selected = false; }
                           });
+                          onDoSearch();
                         },
-                        child: Text("Clear Filter"))
+                        child: Text("Clear Filter")) : Container()
                   ],
                 )
             ),
@@ -283,7 +356,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                 runSpacing: 5,
                 children: [
                   ...buildDateFilterWidgets(),
-                  TextButton(
+                  hasDateFilter() ? TextButton(
                       style: TextButton.styleFrom(
                           minimumSize: Size(80, 35),
                           foregroundColor: Colors.grey,
@@ -294,7 +367,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                           for (var date in dateFilters) {date.selected = false; }
                         });
                       },
-                      child: Text("Clear Filter"))
+                      child: Text("Clear Filter")) : Container()
                 ],
               )
             ),
@@ -332,8 +405,19 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
         actionWidget: InkWell(
             onTap: showSearchBar,
             child: Container(
-                height: 35, width: 35,
-                child: Icon(Icons.search, color: Colors.grey.shade600))));
+                margin: EdgeInsets.only(left: 5, right: 5),
+                height: 25, width: 25,
+                child: Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    Icon(Icons.search,
+                        color: isFilteringActive() ? Colors.red : Colors.grey.shade600),
+                    isFilteringActive() ? Container(
+                      height: 5, width: 5,
+                      child: Icon(Icons.add, size: 12, color: Colors.red),
+                    ) : Container(),
+                  ],
+                ))));
   }
 
   void showSearchBar() async {
