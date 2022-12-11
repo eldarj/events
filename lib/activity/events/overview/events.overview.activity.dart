@@ -12,6 +12,7 @@ import 'package:dubai_events/service/client/http.response.extension.dart';
 import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/shared/activity-title/activity.title.component.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
+import 'package:dubai_events/shared/drawer/navigation-drawer.component.dart';
 import 'package:dubai_events/shared/global/shadows.values.dart';
 import 'package:dubai_events/shared/info/info.component.dart';
 import 'package:dubai_events/shared/layout/horizontal.line.component.dart';
@@ -103,6 +104,17 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   void dispose() {
     searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        drawer: NavigationDrawerComponent(),
+        body: Builder(builder: (context) {
+          scaffold = Scaffold.of(context);
+          return render();
+        })
+    );
   }
 
   @override
@@ -398,26 +410,42 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   Widget buildActivityTitle() {
     return ActivityTitleComponent(
-        leading: Container(
-          child: Image.asset('static/image/company/events-logo.png', width: 35, height: 35),
+        leading: Material(
+          color: Colors.white,
+          child: InkWell(
+            onTap: () {
+              scaffold?.openDrawer();
+            },
+            customBorder: const CircleBorder(),
+            child: Container(
+              padding: EdgeInsets.all(15),
+              child: Icon(Icons.menu,
+                  color: Colors.grey.shade600),
+            ),
+          ),
         ),
         title: "Upcoming Events",
-        actionWidget: InkWell(
-            onTap: showSearchBar,
-            child: Container(
-                margin: EdgeInsets.only(left: 5, right: 5),
-                height: 25, width: 25,
-                child: Stack(
-                  alignment: Alignment.topRight,
-                  children: [
-                    Icon(Icons.search,
-                        color: isFilteringActive() ? Colors.red : Colors.grey.shade600),
-                    isFilteringActive() ? Container(
-                      height: 5, width: 5,
-                      child: Icon(Icons.add, size: 12, color: Colors.red),
-                    ) : Container(),
-                  ],
-                ))));
+        actionWidget: Material(
+          color: Colors.white,
+          child: InkWell(
+              onTap: showSearchBar,
+              customBorder: const CircleBorder(),
+              child: Container(
+                  padding: EdgeInsets.only(left: 15, right: 15),
+                  child: Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      Center(
+                        child: Icon(Icons.search,
+                            color: isFilteringActive() ? Colors.red : Colors.grey.shade600),
+                      ),
+                      isFilteringActive() ? Container(
+                        height: 30, width: 10,
+                        child: Icon(Icons.add, size: 12, color: Colors.red),
+                      ) : Container(),
+                    ],
+                  ))),
+        ));
   }
 
   void showSearchBar() async {
