@@ -53,6 +53,7 @@ dependencies:
   font_awesome_flutter: ^10.2.1
   rxdart: ^0.27.7
   modal_bottom_sheet: ^2.1.2
+  line_icons: ^2.0.1
 
 dev_dependencies:
   flutter_test:
@@ -81,7 +82,7 @@ flutter:
     - static/image/company/
     - static/image/icon/
     - static/image/profile/
-    - static/image/flag/
+    - static/image/illustration/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

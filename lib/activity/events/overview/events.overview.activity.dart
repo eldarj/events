@@ -36,6 +36,7 @@ class EventsOverviewActivity extends StatefulWidget {
 }
 
 class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
+  // ignore: constant_identifier_names
   static const String STREAMS_LISTENER_ID = "EventsOverviewActivityState";
 
   List<EventModel> events = [];
@@ -65,20 +66,20 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   handleMenuItemPressedEvent(MenuItemType type) {
     if (type == MenuItemType.SETTINGS) {
-      NavigatorUtil.push(context, SettingsOverviewActivity());
+      NavigatorUtil.push(context, const SettingsOverviewActivity());
     } else if (type == MenuItemType.SEARCH) {
       showSearchBar();
     }
   }
-  
-  
+
+
   initialize() async {
     setState(() {
       displayLoader = true;
     });
 
     menuEventsPublisher.onMenuItemPressed(STREAMS_LISTENER_ID, handleMenuItemPressedEvent);
-    
+
     doGetCategories().then(onGetCategoriesSuccess, onError: onGetCategoriesError);
 
     doGetEvents(page: pageNumber)
@@ -119,7 +120,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   @override
   Widget render() {
-    Widget widget = Center(child: const SpinnerComponent());
+    Widget widget = const Center(child: SpinnerComponent());
 
     if (!displayLoader) {
       if (!isError) {
@@ -226,7 +227,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                 )),
             InkWell(
                 onTap: hideSearchBar,
-                child: Container(
+                child: SizedBox(
                     height: 35, width: 35,
                     child: Icon(Icons.close_rounded, color: Colors.grey.shade600))),
           ]
@@ -280,8 +281,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                  margin: EdgeInsets.only(right: 5),
-                  child: Icon(Icons.close_rounded, size: 16)
+                  margin: const EdgeInsets.only(right: 5),
+                  child: const Icon(Icons.close_rounded, size: 16)
               ),
               const Text('Remove All Filters'),
             ],
@@ -316,7 +317,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   Widget buildTitleSearch() {
     return AnimatedOpacity(
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
       opacity: searchOpacityVisible ? 1.0 : 0.0,
       child: Container(
         decoration: BoxDecoration(
@@ -331,10 +332,10 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
             buildSearchField(),
             Container(height: 1, color: Colors.grey.shade100),
             Container(
-              margin: EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
-              child: Text("Filter by categories", style: TextStyle(color: Colors.grey))
+              margin: const EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
+              child: const Text("Filter by categories", style: TextStyle(color: Colors.grey))
             ),
-            Container(
+            SizedBox(
                 width: deviceMediaSize.width,
                 child: Wrap(
                   spacing: 5,
@@ -343,7 +344,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                     ...buildCategoryFilterWidgets(),
                     hasCategoryFilter() ? TextButton(
                         style: TextButton.styleFrom(
-                            minimumSize: Size(80, 35),
+                            minimumSize: const Size(80, 35),
                             foregroundColor: Colors.grey,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap
                         ),
@@ -353,15 +354,15 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                           });
                           onDoSearch();
                         },
-                        child: Text("Clear Filter")) : Container()
+                        child: const Text("Clear Filter")) : Container()
                   ],
                 )
             ),
             Container(
-                margin: EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
-                child: Text("Filter by date", style: TextStyle(color: Colors.grey))
+                margin: const EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
+                child: const Text("Filter by date", style: TextStyle(color: Colors.grey))
             ),
-            Container(
+            SizedBox(
               width: deviceMediaSize.width,
               child: Wrap(
                 spacing: 5,
@@ -370,7 +371,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                   ...buildDateFilterWidgets(),
                   hasDateFilter() ? TextButton(
                       style: TextButton.styleFrom(
-                          minimumSize: Size(80, 35),
+                          minimumSize: const Size(80, 35),
                           foregroundColor: Colors.grey,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap
                       ),
@@ -379,28 +380,28 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                           for (var date in dateFilters) {date.selected = false; }
                         });
                       },
-                      child: Text("Clear Filter")) : Container()
+                      child: const Text("Clear Filter")) : Container()
                 ],
               )
             ),
             Container(
-                margin: EdgeInsets.only(top: 15, bottom: 10),
+                margin: const EdgeInsets.only(top: 15, bottom: 10),
                 height: 1, color: Colors.grey.shade100),
             Container(
-              margin: EdgeInsets.only(bottom: 10),
+              margin: const EdgeInsets.only(bottom: 10),
               alignment: Alignment.center,
               child: TextButton(
                   onPressed: onDoSearch,
                   style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all(Size(250, 35)),
+                    minimumSize: MaterialStateProperty.all(const Size(250, 35)),
                     backgroundColor: MaterialStateProperty.all(Colors.red.shade400),
                     foregroundColor: MaterialStateProperty.all(Colors.white),
                     shape: MaterialStateProperty.all<OutlinedBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50),
-                        side: BorderSide(width: 1.0, color: Colors.red)),
+                        side: const BorderSide(width: 1.0, color: Colors.red)),
                   )),
-                  child: searchLoading ? SpinnerComponent(size: 20, strokeWidth: 2, color: Colors.white) : Text("Search"))
+                  child: searchLoading ? const SpinnerComponent(size: 20, strokeWidth: 2, color: Colors.white) : const Text("Search"))
             ),
           ],
         )
@@ -418,8 +419,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
             },
             customBorder: const CircleBorder(),
             child: Container(
-              padding: EdgeInsets.all(15),
-              child: Icon(Icons.menu,
+              padding: const EdgeInsets.all(15),
+              child: Icon(Icons.grid_view,
                   color: Colors.grey.shade600),
             ),
           ),
@@ -431,7 +432,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
               onTap: showSearchBar,
               customBorder: const CircleBorder(),
               child: Container(
-                  padding: EdgeInsets.only(left: 15, right: 15),
+                  padding: const EdgeInsets.only(left: 15, right: 15),
                   child: Stack(
                     alignment: Alignment.topRight,
                     children: [
@@ -439,7 +440,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                         child: Icon(Icons.search,
                             color: isFilteringActive() ? Colors.red : Colors.grey.shade600),
                       ),
-                      isFilteringActive() ? Container(
+                      isFilteringActive() ? const SizedBox(
                         height: 30, width: 10,
                         child: Icon(Icons.add, size: 12, color: Colors.red),
                       ) : Container(),
@@ -452,7 +453,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     setState(() {
       displaySearchBar = true;
     });
-    await Future.delayed(Duration(milliseconds: 1));
+    await Future.delayed(const Duration(milliseconds: 1));
     setState(() {
       searchOpacityVisible = true;
     });
@@ -564,7 +565,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
     return widgets;
   }
-  
+
   List<Widget> buildCategoryFilterWidgets() {
     List<Widget> widgets = [];
 
@@ -603,7 +604,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   void onGetCategoriesSuccess(result) async {
     for (var element in result) {
-      categories.add(FilterItem(element));
+      categories.add(FilterItem(element['name']));
     }
   }
 

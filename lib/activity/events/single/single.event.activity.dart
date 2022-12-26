@@ -7,7 +7,6 @@ import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
 import 'package:dubai_events/shared/global/shadows.values.dart';
 import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -211,10 +210,10 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                 launchUrl(Uri(scheme: "tel", path: widget.event.eventContact?.phoneNumber ?? ""));
               }),
               contactTile(Icons.whatsapp, widget.event.eventContact?.whatsappNumber, () {
-                launchUrl(Uri.parse("whatsapp://send?phone=${widget.event.eventContact?.whatsappNumber}" ?? ""));
+                launchUrl(Uri.parse("whatsapp://send?phone=${widget.event.eventContact?.whatsappNumber}"));
               }),
               contactTile(Icons.phone, widget.event.eventContact?.email, () {
-                launchUrl(Uri.parse("mailto:${widget.event.eventContact?.whatsappNumber}" ?? ""));
+                launchUrl(Uri.parse("mailto:${widget.event.eventContact?.whatsappNumber}"));
               }),
               contactTile(Icons.facebook_rounded, "Facebook Page", () {
                 launchUrl(Uri.parse(widget.event.eventContact?.facebookUrl ?? ""));
@@ -250,31 +249,29 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  widget.event.eventLocation?.name == null ? Container() : Container(
-                    child: Material(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(150)),
-                        color: Colors.white,
-                        child: InkWell(
-                          onTap: () {
-                            copyToClipBoard();
-                            SnackbarHandler.show(context, text: 'Successfully copied to clipboard',
-                                textColor: Colors.grey.shade700, icon: Icon(
-                                Icons.check_box_outlined, color: Colors.green.shade300
-                            ));
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.only(top: 5, bottom: 10, left: 10, right: 10),
-                            child: Row(mainAxisSize: MainAxisSize.min, children: [
-                              Container(
-                                  margin: const EdgeInsets.only(right: 15),
-                                  child: Text(widget.event.eventLocation?.name ?? "",
-                                      style: TextStyle(color: Colors.grey.shade700))),
-                              Icon(Icons.copy, size: 16, color: Colors.red.shade400,)
-                            ]),
-                          ),
-                        )),
-                  ),
+                  widget.event.eventLocation?.name == null ? Container() : Material(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(150)),
+                      color: Colors.white,
+                      child: InkWell(
+                        onTap: () {
+                          copyToClipBoard();
+                          SnackbarHandler.show(context, text: 'Successfully copied to clipboard',
+                              textColor: Colors.grey.shade700, icon: Icon(
+                              Icons.check_box_outlined, color: Colors.green.shade300
+                          ));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.only(top: 5, bottom: 10, left: 10, right: 10),
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [
+                            Container(
+                                margin: const EdgeInsets.only(right: 15),
+                                child: Text(widget.event.eventLocation?.name ?? "",
+                                    style: TextStyle(color: Colors.grey.shade700))),
+                            Icon(Icons.copy, size: 16, color: Colors.red.shade400,)
+                          ]),
+                        ),
+                      )),
                   Container(
                     margin: const EdgeInsets.only(right: 5),
                     child: Material(

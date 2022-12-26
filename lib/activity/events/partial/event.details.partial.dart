@@ -24,7 +24,7 @@ class EventDetailsPartial extends StatelessWidget {
             Container(
                 margin: const EdgeInsets.only(left: 10, right: 5),
                 child: Icon(Icons.watch_later_outlined, color: Colors.grey.shade700, size: 14)),
-            Text(HumanTimes.getDate(event.eventTimestamp),
+            Text(HumanTimes.getDate(event.eventDate?.dateMillis ?? 0),
                 style: TextStyle(color: Colors.grey.shade700))
           ])
         ]),

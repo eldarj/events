@@ -23,45 +23,43 @@ class SettingsOverviewActivityState
         ),
         body: Builder(builder: (context) {
           scaffold = Scaffold.of(context);
-          return Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Column(
-                  children: [
-                    Container(height: 5, color: Colors.grey.shade100),
-                    Container(
-                      color: Colors.white,
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Container(
-                          padding: const EdgeInsets.only(top: 5, bottom: 0),
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            contactTile(Icons.person, "Profile", () {
-                            }),
-                            contactTile(Icons.map_outlined, "Addresses", () {
-                            }),
-                            contactTile(Icons.payment, "Payment Methods", () {
-                            }),
-                            contactTile(Icons.card_giftcard, "Referral Codes", () {
-                            }),
-                            contactTile(Icons.help_outline, "Get Help", () {
-                            }),
-                          ]),
-                        ),
-                      ]),
-                    )
-                  ],
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                children: [
+                  Container(height: 5, color: Colors.grey.shade100),
+                  Container(
+                    color: Colors.white,
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Container(
+                        padding: const EdgeInsets.only(top: 5, bottom: 0),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          contactTile(Icons.person, "Profile", () {
+                          }),
+                          contactTile(Icons.map_outlined, "Addresses", () {
+                          }),
+                          contactTile(Icons.payment, "Payment Methods", () {
+                          }),
+                          contactTile(Icons.card_giftcard, "Referral Codes", () {
+                          }),
+                          contactTile(Icons.help_outline, "Get Help", () {
+                          }),
+                        ]),
+                      ),
+                    ]),
+                  )
+                ],
+              ),
+              Expanded(
+                child: Container(
+                    margin: const EdgeInsets.all(15),
+                    alignment: Alignment.bottomCenter,
+                    child: Text("v1.0.0", style: TextStyle(fontSize: 11, color: Colors.grey.shade400))
                 ),
-                Expanded(
-                  child: Container(
-                      margin: const EdgeInsets.all(15),
-                      alignment: Alignment.bottomCenter,
-                      child: Text("v1.0.0", style: TextStyle(fontSize: 11, color: Colors.grey.shade400))
-                  ),
-                )
-              ],
-            ),
+              )
+            ],
           );
         })
     );
@@ -88,9 +86,7 @@ class SettingsOverviewActivityState
                   child: Icon(icon, color: Colors.grey.shade700, size: 18)),
               Text(text ?? "", style: TextStyle(color: Colors.grey.shade700)),
             ]),
-            showRightArrow ? Container(
-              child: Icon(Icons.arrow_forward,  color: Colors.grey.shade700, size: 18)
-            ) : Container()
+            showRightArrow ? Icon(Icons.arrow_forward,  color: Colors.grey.shade700, size: 18) : Container()
           ]),
         ),
       ),

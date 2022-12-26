@@ -38,7 +38,7 @@ class MapComponentState extends State<MapComponent> {
         initialCameraPosition: cameraPosition,
         markers: {
           Marker(
-            position: cameraPosition.target, markerId: MarkerId('Map'),
+            position: cameraPosition.target, markerId: const MarkerId('Map'),
           )
         },
         onMapCreated: (GoogleMapController controller) {

@@ -1,13 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dubai_events/activity/settings/overview/settings.overview.activity.dart';
 import 'package:dubai_events/main.dart';
-import 'package:dubai_events/shared/activity-title/activity.title.component.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
 import 'package:dubai_events/shared/drawer/partial/drawer-items.dart';
-import 'package:dubai_events/shared/global/shadows.values.dart';
 import 'package:flutter/material.dart';
 
 class NavigationDrawerComponent extends StatefulWidget {
+  const NavigationDrawerComponent({super.key});
+
   @override
   State<StatefulWidget> createState() => NavigationDrawerComponentState();
 }
@@ -29,11 +28,11 @@ class NavigationDrawerComponentState
 
   @override
   Widget render() {
-    return Container(
+    return SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Drawer(
             child: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
           ),
           child: Column(
@@ -47,7 +46,7 @@ class NavigationDrawerComponentState
                       children: [
                         Container(
                           margin: EdgeInsets.only(top: deviceMediaPadding.top),
-                          padding: EdgeInsets.only(left: 2.5),
+                          padding: const EdgeInsets.only(left: 2.5),
                           child: SizedBox(
                             height: 55,
                             child: Row(
@@ -84,7 +83,7 @@ class NavigationDrawerComponentState
                                 buildIcon(
                                     icon: Icons.bookmark,
                                     backgroundColor: Colors.orange),
-                                activity: SettingsOverviewActivity()),
+                                activity: const SettingsOverviewActivity()),
                             buildSectionTitle("Help & FAQ"),
                             buildDrawerItem(
                                 context,
@@ -92,16 +91,16 @@ class NavigationDrawerComponentState
                                 buildIcon(
                                     icon: Icons.copyright,
                                     backgroundColor: Colors.blueGrey.shade800),
-                                activity: SettingsOverviewActivity()),
+                                activity: const SettingsOverviewActivity()),
                             buildDrawerItem(
                                 context,
                                 'Settings',
                                 buildIcon(
                                     icon: Icons.settings,
                                     backgroundColor: Colors.pink.shade800),
-                                activity: SettingsOverviewActivity()),
+                                activity: const SettingsOverviewActivity()),
                             Container(
-                              margin: EdgeInsets.only(top: 25),
+                              margin: const EdgeInsets.only(top: 25),
                               color: Colors.grey.shade200,
                               height: 1,
                             ),
@@ -115,7 +114,7 @@ class NavigationDrawerComponentState
                                       child: Container(
                                           alignment: Alignment.center,
                                           height: 75, width: 75,
-                                          margin: EdgeInsets.only(top: 35),
+                                          margin: const EdgeInsets.only(top: 35),
                                           decoration: BoxDecoration(
                                               boxShadow: [
                                                 BoxShadow(

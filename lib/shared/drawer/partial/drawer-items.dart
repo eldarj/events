@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 Widget buildSectionTitle(String sectionTitle, { double topMargin = 15.0}) {
   return Container(
       padding: EdgeInsets.only(top: topMargin, left: 20),
-      child: Text("$sectionTitle", style: TextStyle(fontSize: 12, color: Colors.grey)));
+      child: Text(sectionTitle, style: const TextStyle(fontSize: 12, color: Colors.grey)));
 }
 
 Widget buildDrawerItem(BuildContext context, String labelName, Widget iconWidget,
@@ -25,13 +25,14 @@ Widget buildDrawerItem(BuildContext context, String labelName, Widget iconWidget
           crossAxisAlignment: crossAxisAlignment,
           children: <Widget>[
             Container(
-                padding: EdgeInsets.only(right: 10),
+                padding: const EdgeInsets.only(right: 10),
                 child: iconWidget),
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(labelName, style: TextStyle(
                 color: Colors.grey.shade700,
               )),
-              labelDescription != null && labelDescription != '' ? Text(labelDescription, style: TextStyle(
+              // ignore: unnecessary_null_comparison
+              labelDescription != null && labelDescription != '' ? Text(labelDescription, style: const TextStyle(
                   fontSize: 12,
                   color: Colors.grey
               )) : Container()
@@ -49,7 +50,7 @@ Widget buildIcon({ IconData? icon, String? iconPath, Color backgroundColor = Col
         shape: BoxShape.circle,
         color: backgroundColor,
       ),
-      child: Container(width: 40, height: 40, padding: EdgeInsets.all(10),
+      child: Container(width: 40, height: 40, padding: const EdgeInsets.all(10),
           child: icon != null ? Icon(icon, size: 20, color: Colors.white)
               : Image.asset(iconPath ?? '', height: 20, color: Colors.white)));
 }

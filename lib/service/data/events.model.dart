@@ -1,5 +1,7 @@
 import 'package:dubai_events/service/data/events.contact.model.dart';
+import 'package:dubai_events/service/data/events.date.model.dart';
 import 'package:dubai_events/service/data/events.location.model.dart';
+import 'package:dubai_events/service/data/events.time.model.dart';
 
 class EventModel {
   String id;
@@ -13,13 +15,12 @@ class EventModel {
   List<String> galleryImageUrls;
 
   int eventCreatedTimestamp;
-  int eventTimestamp;
+  EventTimeModel? eventTime;
+  EventDateModel? eventDate;
 
   double ticketPrice;
   String reservationUrl;
-
   List<String> categories;
-
   bool published;
 
   EventContactModel? eventContact;
@@ -37,7 +38,8 @@ class EventModel {
       this.coverImageUrl,
       this.galleryImageUrls,
       this.eventCreatedTimestamp,
-      this.eventTimestamp,
+      this.eventDate,
+      this.eventTime,
       this.ticketPrice,
       this.reservationUrl,
       this.categories,
@@ -65,7 +67,12 @@ class EventModel {
       parsedJson['coverImageUrl'] as String,
       List<String>.from(parsedJson['galleryImageUrls'] as List),
       parsedJson['eventCreatedTimestamp'] as int,
-      parsedJson['eventTimestamp'] as int,
+      parsedJson['eventDate'] == null
+          ? null
+          : EventDateModel.fromJson(parsedJson['eventDate']),
+      parsedJson['eventTime'] == null
+          ? null
+          : EventTimeModel.fromJson(parsedJson['eventTime']),
       parsedJson['ticketPrice'] as double,
       parsedJson['reservationUrl'] as String,
       List<String>.from(parsedJson['categories'] as List),
@@ -88,7 +95,8 @@ class EventModel {
         'coverImageUrl': coverImageUrl,
         'galleryImageUrls': galleryImageUrls,
         'eventCreatedTimestamp': eventCreatedTimestamp,
-        'eventTimestamp': eventTimestamp,
+        'eventDate': eventDate,
+        'eventTime': eventTime,
         'ticketPrice': ticketPrice,
         'reservationUrl': reservationUrl,
         'categories': categories,

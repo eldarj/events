@@ -3,6 +3,7 @@ import 'package:dubai_events/service/data/events.model.dart';
 import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
 class EventActionsPartial extends StatelessWidget {
@@ -39,8 +40,8 @@ class EventActionsPartial extends StatelessWidget {
                     },
                     icon: Icon(
                         event.saved
-                            ? CupertinoIcons.bookmark_fill
-                            : CupertinoIcons.bookmark,
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
                         color: event.saved
                             ? Colors.yellow.shade600
                             : Colors.grey.shade400)),
@@ -63,8 +64,8 @@ class EventActionsPartial extends StatelessWidget {
       description: event.description,
       location: event.eventLocation?.name ?? 'Dubai Events',
       startDate:
-      DateTime.fromMillisecondsSinceEpoch(event.eventTimestamp),
-      endDate: DateTime.fromMillisecondsSinceEpoch(event.eventTimestamp),
+      DateTime.fromMillisecondsSinceEpoch(event.eventDate?.dateMillis ?? event.eventDate?.fromMillis ?? 0),
+      endDate: DateTime.fromMillisecondsSinceEpoch(event.eventDate?.dateMillis ?? event.eventDate?.toMillis ?? 0),
     ));
   }
 }

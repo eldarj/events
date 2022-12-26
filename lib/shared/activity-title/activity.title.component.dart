@@ -21,7 +21,7 @@ class ActivityTitleComponent extends StatelessWidget {
           children: [
             leading ?? Container(),
             Container(
-              margin: EdgeInsets.only(left: 5),
+              margin: const EdgeInsets.only(left: 5),
               child: Text(title,
                   style: const TextStyle(
                       color: Color(0xCC000000),
