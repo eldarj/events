@@ -36,7 +36,7 @@ class EventActionsPartial extends StatelessWidget {
                         event.saved = !event.saved;
                       });
                       SnackbarHandler.show(context,
-                          text: 'Event saved to Wishlist');
+                          text: event.saved ? 'Event saved to wishlist!' : 'Event removed from wishlist!');
                     },
                     icon: Icon(
                         event.saved

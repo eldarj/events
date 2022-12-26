@@ -7,10 +7,11 @@ class SnackbarHandler {
       padding: const EdgeInsets.only(top: 20, bottom: 20, left: 15, right: 15),
       backgroundColor: Colors.grey.shade100,
       content: Row(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(text, style: TextStyle(fontFamily: 'Ubuntu', color: textColor ?? Colors.black87)),
-          icon ?? Container()
+          Text(text, style: TextStyle(color: textColor ?? Colors.black54)),
+          icon ?? Container(height: 0)
         ],
       ),
     ));
