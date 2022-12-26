@@ -5,8 +5,13 @@ class HumanTimes {
     return getDate(int.parse(timestamp));
   }
 
+  static int getYear(int timestamp) {
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp.round());
+    return date.year;
+  }
+
   static String getDate(int timestamp) {
-    final dateFormat = DateFormat('EEEE MMM. d');
+    final dateFormat = DateFormat('EEEE d. MMM');
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp.round());
 
     return dateFormat.format(date);

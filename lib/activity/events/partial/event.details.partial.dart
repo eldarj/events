@@ -56,9 +56,20 @@ class EventDetailsPartial extends StatelessWidget {
           style: TextStyle(color: Colors.grey.shade700));
 
     } else if (event.eventDate?.dateType == 'Daily') {
-      var from = HumanTimes.getDate(event.eventDate?.fromMillis ?? 0);
-      var to = HumanTimes.getDate(event.eventDate?.toMillis ?? 0);
-      w = Text('From $from To $to',
+      var fromMillis = event.eventDate?.fromMillis ?? 0;
+      var toMillis = event.eventDate?.toMillis ?? 0;
+
+      var from = HumanTimes.getDate(fromMillis);
+      var to = HumanTimes.getDate(toMillis);
+
+      var fromYear = HumanTimes.getYear(fromMillis);
+      var toYear = HumanTimes.getYear(toMillis);
+      if (fromYear != toYear) {
+        from = '$from, $fromYear';
+        to = '$to, $toYear';
+      }
+
+      w = Text('$from - $to',
           style: TextStyle(color: Colors.grey.shade700));
 
     } else if (event.eventDate?.dateType == 'Weekly') {
