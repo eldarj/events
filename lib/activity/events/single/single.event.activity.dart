@@ -10,6 +10,7 @@ import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -33,7 +34,14 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
     return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          leading: const CloseButton(),
+          leading: IconButton(
+            icon: Icon(LineIcons.arrowLeft),
+            color: Colors.white,
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+            onPressed: () {
+              Navigator.maybePop(context);
+            },
+          ),
           elevation: 0,
           backgroundColor: Colors.transparent,
         ),
@@ -95,18 +103,21 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                           const EdgeInsets.symmetric(vertical: 2.5, horizontal: 7.5),
                       margin: const EdgeInsets.only(bottom: 5),
                       decoration: BoxDecoration(
-                        color: Colors.black87,
+                        color: Colors.black38,
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Text('$galleryIndex/$galleryLength',
                           style:
-                              const TextStyle(color: Colors.white70)))
+                              const TextStyle(color: Colors.white70, fontSize: 11)))
                   : Container(),
             ],
           )),
       Container(
-          color: Colors.white,
-          padding: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+          ),
+          padding: const EdgeInsets.only(left: 10, right: 10),
           child: EventActionsPartial(event: widget.event, setState: setState)),
       Container(height: 5, color: Colors.grey.shade100),
       Container(
@@ -124,48 +135,54 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
           padding: const EdgeInsets.only(bottom: 5, left: 10, right: 10),
           child: EventDetailsPartial(event: widget.event)),
       Container(
+        padding: const EdgeInsets.only(bottom: 10, left: 7.5, right: 10),
+        decoration: BoxDecoration(
           color: Colors.white,
-          padding:
-          const EdgeInsets.only(top: 10, bottom: 5, left: 10, right: 10),
-        child: Text("Description", style: TextStyle(
-            fontWeight: FontWeight.bold, color: Colors.grey.shade700))
-      ),
-      Container(
-        color: Colors.white,
-        padding:
-            const EdgeInsets.only(left: 10, right: 10, bottom: 5),
-        child: Text(widget.event.shortDescription, style: TextStyle(color: Colors.grey.shade700)),
-      ),
-      Container(
-        color: Colors.white,
-        padding:
-        const EdgeInsets.only(top: 5, bottom: 15, left: 10, right: 10),
-        child: Text(widget.event.description, style: TextStyle(color: Colors.grey.shade700)),
-      )
-      ,
-      Container(
-          color: Colors.white,
-          padding:
-          const EdgeInsets.only(bottom: 5, left: 10, right: 10),
-          child: Text("Categories", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade700))
-      ),
-      Container(
-        color: Colors.white,
-        padding: const EdgeInsets.only(bottom: 15, left: 7.5, right: 10),
+          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+        ),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(children: [
             ...widget.event.categories.map((category) => Container(
               margin: const EdgeInsets.only(right: 5),
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
+                borderRadius: BorderRadius.circular(15),
                 border: Border.all(color: Colors.grey.shade300),
                 color: Colors.white,
               ),
               child: Text(category, style: TextStyle(color: Colors.red.shade400)),
             )),
           ]),
+        ),
+      )
+      ,
+      Container(height: 5, color: Colors.grey.shade100),
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+                padding:
+                const EdgeInsets.only(top: 10, bottom: 5, left: 10, right: 10),
+                child: Text("Description", style: TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.grey.shade700))
+            ),
+            Container(
+              padding:
+              const EdgeInsets.only(left: 10, right: 10, bottom: 5),
+              child: Text(widget.event.shortDescription, style: TextStyle(color: Colors.grey.shade700)),
+            ),
+            Container(
+              padding:
+              const EdgeInsets.only(top: 5, bottom: 15, left: 10, right: 10),
+              child: Text(widget.event.description, style: TextStyle(color: Colors.grey.shade700)),
+            ),
+          ],
         ),
       )
       ,
@@ -177,7 +194,10 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
             launchUrl(Uri.parse(widget.event.reservationUrl));
           },
           child: Container(
-            margin: const EdgeInsets.only(top: 10, left: 10, bottom: 10, right: 10),
+            padding: const EdgeInsets.only(top: 10, left: 10, bottom: 10, right: 10),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+            ),
             child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text("Reservations", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
               Container(
@@ -188,7 +208,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                   color: Colors.white,
                   border: Border.all(color: Colors.grey.shade300),
                 ),
-                child: Text("Navigate to URL", style: TextStyle(color: Colors.red.shade400)),
+                child: Text("Book Now", style: TextStyle(color: Colors.red.shade400)),
               ),
             ]),
           ),
@@ -234,9 +254,7 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
           ? Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(25),
-            bottomRight: Radius.circular(25)),
+          border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
           boxShadow: [Shadows.bottomShadow()]
         ),
         child: Column(
@@ -258,8 +276,8 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                           copyToClipBoard();
                           SnackbarHandler.show(context, text: 'Successfully copied to clipboard',
                               textColor: Colors.grey.shade700, icon: Icon(
-                              Icons.check_box_outlined, color: Colors.green.shade300
-                          ));
+                                  Icons.check_box_outlined, color: Colors.green.shade300
+                              ));
                         },
                         child: Container(
                           padding: const EdgeInsets.only(top: 5, bottom: 10, left: 10, right: 10),
@@ -297,10 +315,10 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                     widget.event.eventLocation?.longitude ?? 0, widget.event.eventLocation?.name);
               },
               child: Container(
-                padding: const EdgeInsets.only(top: 0, bottom: 20, left: 10, right: 10),
                 width: deviceMediaSize.width - 5,
+                margin: const EdgeInsets.only(top: 0, bottom: 20, left: 10, right: 10),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(5),
                   child: CachedNetworkImage(
                     fit: BoxFit.cover,
                     alignment: Alignment.center,
@@ -312,16 +330,17 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
                         child: const CircularProgressIndicator(
                             color: Colors.redAccent)),
                     errorWidget: (context, url, error) =>
-                    Container(
-                        margin: const EdgeInsets.only(top: 50, bottom: 50),
-                        child: const Icon(Icons.broken_image_outlined, color: Colors.grey)),
+                        Container(
+                            margin: const EdgeInsets.only(top: 50, bottom: 50),
+                            child: const Icon(Icons.broken_image_outlined, color: Colors.grey)),
                   ),
                 ),
               ),
             ),
           ],
         ),
-      ) : Container(),
+      ) : Container()
+      ,
       Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.all(15),
@@ -339,7 +358,8 @@ class SingleEventActivityState extends BaseState<SingleEventActivity> {
         child: Container(
           decoration: BoxDecoration(
               border: Border(
-                  bottom: BorderSide(color: showBottomBorder ? Colors.grey.shade200 : Colors.transparent)
+                  bottom: BorderSide(
+                      color: showBottomBorder ? Colors.grey.shade300 : Colors.transparent)
               )
           ),
           padding: const EdgeInsets.only(top: 10, bottom: 10, right: 10, left: 10),

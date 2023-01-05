@@ -6,6 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
+void addToCalendar(EventModel event) {
+  Add2Calendar.addEvent2Cal(Event(
+    title: event.name,
+    description: event.description,
+    location: event.eventLocation?.name ?? 'Dubai Events',
+    startDate:
+    DateTime.fromMillisecondsSinceEpoch(event.eventDate?.dateMillis ?? event.eventDate?.fromMillis ?? 0),
+    endDate: DateTime.fromMillisecondsSinceEpoch(event.eventDate?.dateMillis ?? event.eventDate?.toMillis ?? 0),
+  ));
+}
+
 class EventActionsPartial extends StatelessWidget {
 
   final EventModel event;
@@ -15,8 +26,7 @@ class EventActionsPartial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return                       Container(
-        margin: const EdgeInsets.only(top: 10),
+    return Container(
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -40,10 +50,10 @@ class EventActionsPartial extends StatelessWidget {
                     },
                     icon: Icon(
                         event.saved
-                            ? Icons.bookmark
-                            : Icons.bookmark_border,
+                            ? LineIcons.heartAlt
+                            : LineIcons.heart,
                         color: event.saved
-                            ? Colors.yellow.shade600
+                            ? Colors.redAccent
                             : Colors.grey.shade400)),
                 IconButton(
                     onPressed: () {
@@ -56,16 +66,5 @@ class EventActionsPartial extends StatelessWidget {
               ])
             ])
     );
-  }
-
-  void addToCalendar(EventModel event) {
-    Add2Calendar.addEvent2Cal(Event(
-      title: event.name,
-      description: event.description,
-      location: event.eventLocation?.name ?? 'Dubai Events',
-      startDate:
-      DateTime.fromMillisecondsSinceEpoch(event.eventDate?.dateMillis ?? event.eventDate?.fromMillis ?? 0),
-      endDate: DateTime.fromMillisecondsSinceEpoch(event.eventDate?.dateMillis ?? event.eventDate?.toMillis ?? 0),
-    ));
   }
 }

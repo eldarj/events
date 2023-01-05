@@ -3,6 +3,7 @@ import 'package:dubai_events/main.dart';
 import 'package:dubai_events/shared/base/base.state.dart';
 import 'package:dubai_events/shared/drawer/partial/drawer-items.dart';
 import 'package:flutter/material.dart';
+import 'package:line_icons/line_icons.dart';
 
 class NavigationDrawerComponent extends StatefulWidget {
   const NavigationDrawerComponent({super.key});
@@ -53,11 +54,14 @@ class NavigationDrawerComponentState
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  CloseButton(
-                                      color: Colors.grey.shade600,
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      }),
+                                  IconButton(
+                                    icon: Icon(LineIcons.times),
+                                    color: Colors.grey.shade600,
+                                    tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                                    onPressed: () {
+                                      Navigator.maybePop(context);
+                                    },
+                                  ),
                                 ]),
                           ),
                         ),
@@ -72,32 +76,56 @@ class NavigationDrawerComponentState
                                 context,
                                 'All Events',
                                 buildIcon(
-                                    icon: Icons.event_note,
-                                    backgroundColor: Colors.green),
+                                    icon: LineIcons.calendar,
+                                    backgroundColor: Colors.green.shade600),
                                 onTapFunction: () {
                                   Navigator.pop(context);
                                 }),
+                            // buildDrawerItem(
+                            //     context,
+                            //     'Register',
+                            //     buildIcon(
+                            //         icon: LineIcons.user,
+                            //         backgroundColor: Colors.amber),
+                            //     onTapFunction: () {
+                            //       Navigator.pop(context);
+                            //     }),
                             buildDrawerItem(
                                 context,
                                 'My Saved Events',
                                 buildIcon(
-                                    icon: Icons.bookmark,
-                                    backgroundColor: Colors.orange),
+                                    icon: LineIcons.heartAlt,
+                                    backgroundColor: Colors.redAccent),
                                 activity: const SettingsOverviewActivity()),
                             buildSectionTitle("Help & FAQ"),
                             buildDrawerItem(
                                 context,
+                                'About',
+                                buildIcon(
+                                    icon: Icons.info,
+                                    backgroundColor: Colors.deepPurple.shade800),
+                                activity: const SettingsOverviewActivity()),
+                            buildDrawerItem(
+                                context,
                                 'Terms and Privacy Policy',
                                 buildIcon(
-                                    icon: Icons.copyright,
-                                    backgroundColor: Colors.blueGrey.shade800),
+                                    icon: LineIcons.copyright,
+                                    backgroundColor: Colors.pink.shade600),
                                 activity: const SettingsOverviewActivity()),
                             buildDrawerItem(
                                 context,
                                 'Settings',
                                 buildIcon(
-                                    icon: Icons.settings,
-                                    backgroundColor: Colors.pink.shade800),
+                                    icon: LineIcons.cog,
+                                    backgroundColor: Colors.blueGrey.shade800),
+                                activity: const SettingsOverviewActivity()),
+                            buildSectionTitle("Publishing"),
+                            buildDrawerItem(
+                                context,
+                                'Start Publishing',
+                                buildIcon(
+                                      icon: LineIcons.rocket,
+                                    backgroundColor: Colors.amber.shade800),
                                 activity: const SettingsOverviewActivity()),
                             Container(
                               margin: const EdgeInsets.only(top: 25),
@@ -110,7 +138,7 @@ class NavigationDrawerComponentState
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Opacity(
-                                      opacity: 0.5,
+                                      opacity: 0.7,
                                       child: Container(
                                           alignment: Alignment.center,
                                           height: 75, width: 75,
@@ -137,7 +165,7 @@ class NavigationDrawerComponentState
                                 ]),
                                 Text('For more Events visit www.enganger-cloud.com',
                                     style: TextStyle(
-                                        color: Colors.grey.shade400, fontSize: 11))
+                                        color: Colors.grey.shade400, fontSize: 11)),
                               ],
                             )
                           ]),

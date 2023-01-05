@@ -18,8 +18,14 @@ import 'package:dubai_events/shared/info/info.component.dart';
 import 'package:dubai_events/shared/layout/horizontal.line.component.dart';
 import 'package:dubai_events/shared/loader/spinner.component.dart';
 import 'package:dubai_events/util/navigation/navigator.util.dart';
+import 'package:dubai_events/util/snackbar/snackbar.handler.util.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
+import 'package:line_icons/line_icons.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:share_plus/share_plus.dart';
 
 class FilterItem {
   String text = '';
@@ -49,6 +55,15 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   TextEditingController searchController = TextEditingController();
 
   List<FilterItem> categories = [];
+  List<FilterItem> priceFilters = [
+    FilterItem('Free'),
+    FilterItem('Up to 100 AED'),
+    FilterItem('Up to 250 AED'),
+    FilterItem('Up to 500 AED'),
+    FilterItem('Above 500 AED'),
+    FilterItem('Above 1000 AED'),
+  ];
+
   List<FilterItem> dateFilters = [
     FilterItem('Today'),
     FilterItem('Tomorrow'),
@@ -63,6 +78,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   bool isLoadingOnScroll = false;
   bool noMoreItemsToLoad = false;
   int pageNumber = 0;
+
+  bool noEventsLoaded = false;
 
   handleMenuItemPressedEvent(MenuItemType type) {
     if (type == MenuItemType.SETTINGS) {
@@ -82,8 +99,10 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
     doGetCategories().then(onGetCategoriesSuccess, onError: onGetCategoriesError);
 
-    doGetEvents(page: pageNumber)
-        .then(onGetEventsSuccess, onError: onGetEventsError);
+    Timer(const Duration(milliseconds: 1000), () => {
+      doGetEvents(page: pageNumber)
+          .then(onGetEventsSuccess, onError: onGetEventsError)
+    });
   }
 
   @override
@@ -120,7 +139,11 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
   @override
   Widget render() {
-    Widget widget = const Center(child: SpinnerComponent());
+    Widget widget = Center(child: LoadingAnimationWidget.twistingDots(
+      leftDotColor: Colors.red,
+      rightDotColor: Colors.amber,
+      size: 50,
+    ));
 
     if (!displayLoader) {
       if (!isError) {
@@ -136,8 +159,8 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                 ),
                 displaySearchBar ? buildTitleSearch() : Container(),
                 searchLoading ? buildSearchLoadingWidget() : Container(),
+                isFilteringActive() ? buildClearFilterWidget() : Container(),
                 isLoadingOnScroll ? buildScrollLoadingWidget() : Container(),
-                isFilteringActive() ? buildClearFilterWidget() : Container()
               ],
             ),
           );
@@ -160,8 +183,10 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   Widget buildListView() {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
-        if (!displayLoader &&
-            scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+        if (!displayLoader
+            && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent
+            && scrollInfo is UserScrollNotification
+            && scrollInfo.direction == ScrollDirection.reverse) {
           getNextPageOnScroll();
         }
 
@@ -172,19 +197,39 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
           itemCount: events.length + 2,
           itemBuilder: (context, index) {
             if (index == 0) {
-              return buildActivityTitle();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildActivityTitle(),
+                  buildCategoryFilterRow(),
+                  noEventsLoaded ? Container() : Column(
+                    children: [
+                      Container(
+                        color: Colors.grey.shade100,
+                        padding: EdgeInsets.only(top: 10, bottom: 10),
+                        child: Column(
+                          children: [
+                            buildPopularEventsRow(),
+                          ],
+                        ),
+                      ),
+                      buildUpcomingTitle()
+                    ],
+                  ),
+                ],
+              );
             }
 
-            if (index == events.length + 1) {
-              return Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.only(top: 15, bottom: 25),
-                  child: Text('For more Events visit www.enganger-cloud.com',
-                      style: TextStyle(
-                          color: Colors.grey.shade400, fontSize: 11)));
+            if (index < events.length + 1) {
+              return buildSingleEventRow(events[index - 1], promoted: index == 2);
             }
 
-            return buildSingleEventRow(events[index - 1]);
+            return Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.only(top: 15, bottom: 25),
+                child: Text('For more Events visit www.enganger-cloud.com',
+                    style: TextStyle(
+                        color: Colors.grey.shade400, fontSize: 11)));
           },
         ),
       ),
@@ -221,7 +266,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                       hintText: 'Search by name',
                       labelText: 'Search by name',
                       floatingLabelBehavior: FloatingLabelBehavior.never,
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      prefixIcon: Icon(LineIcons.search, color: Colors.grey),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.only(left: 20, right: 20, top: 4, bottom: 0)),
                 )),
@@ -229,7 +274,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                 onTap: hideSearchBar,
                 child: SizedBox(
                     height: 35, width: 35,
-                    child: Icon(Icons.close_rounded, color: Colors.grey.shade600))),
+                    child: Icon(LineIcons.times, color: Colors.grey.shade600))),
           ]
       ),
     );
@@ -269,7 +314,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
   Widget buildClearFilterWidget() {
     return Container(
         alignment: Alignment.bottomCenter,
-        margin: const EdgeInsets.only(bottom: 25),
+        margin: const EdgeInsets.only(bottom: 10),
         child: OutlinedButton(
           onPressed: clearAllFilters,
           style: ElevatedButton.styleFrom(
@@ -333,7 +378,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
             Container(height: 1, color: Colors.grey.shade100),
             Container(
               margin: const EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
-              child: const Text("Filter by categories", style: TextStyle(color: Colors.grey))
+              child: const Text("Categories", style: TextStyle(color: Colors.grey))
             ),
             SizedBox(
                 width: deviceMediaSize.width,
@@ -354,13 +399,39 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                           });
                           onDoSearch();
                         },
-                        child: const Text("Clear Filter")) : Container()
+                        child: const Text("Clear Filter")) : const Text("")
                   ],
                 )
             ),
             Container(
                 margin: const EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
-                child: const Text("Filter by date", style: TextStyle(color: Colors.grey))
+                child: const Text("Price", style: TextStyle(color: Colors.grey))
+            ),
+            SizedBox(
+                width: deviceMediaSize.width,
+                child: Wrap(
+                  spacing: 5,
+                  runSpacing: 5,
+                  children: [
+                    ...buildPriceFilterWidgets(),
+                    hasDateFilter() ? TextButton(
+                        style: TextButton.styleFrom(
+                            minimumSize: const Size(80, 35),
+                            foregroundColor: Colors.grey,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            for (var date in dateFilters) {date.selected = false; }
+                          });
+                        },
+                        child: const Text("Clear Filter")) : const Text("")
+                  ],
+                )
+            ),
+            Container(
+                margin: const EdgeInsets.only(top: 15, bottom: 10, left: 2.5),
+                child: const Text("When", style: TextStyle(color: Colors.grey))
             ),
             SizedBox(
               width: deviceMediaSize.width,
@@ -380,7 +451,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                           for (var date in dateFilters) {date.selected = false; }
                         });
                       },
-                      child: const Text("Clear Filter")) : Container()
+                      child: const Text("Clear Filter")) : const Text("")
                 ],
               )
             ),
@@ -394,7 +465,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                   onPressed: onDoSearch,
                   style: ButtonStyle(
                     minimumSize: MaterialStateProperty.all(const Size(250, 35)),
-                    backgroundColor: MaterialStateProperty.all(Colors.red.shade400),
+                    backgroundColor: MaterialStateProperty.all(Colors.redAccent),
                     foregroundColor: MaterialStateProperty.all(Colors.white),
                     shape: MaterialStateProperty.all<OutlinedBorder>(
                       RoundedRectangleBorder(
@@ -420,12 +491,12 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
             customBorder: const CircleBorder(),
             child: Container(
               padding: const EdgeInsets.all(15),
-              child: Icon(Icons.grid_view,
+              child: Icon(LineIcons.bars,
                   color: Colors.grey.shade600),
             ),
           ),
         ),
-        title: "Upcoming Events",
+        title: "Explore",
         actionWidget: Material(
           color: Colors.white,
           child: InkWell(
@@ -434,10 +505,10 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
               child: Container(
                   padding: const EdgeInsets.only(left: 15, right: 15),
                   child: Stack(
-                    alignment: Alignment.topRight,
+                    alignment: Alignment.bottomRight,
                     children: [
                       Center(
-                        child: Icon(Icons.search,
+                        child: Icon(LineIcons.search,
                             color: isFilteringActive() ? Colors.red : Colors.grey.shade600),
                       ),
                       isFilteringActive() ? const SizedBox(
@@ -467,7 +538,7 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     });
   }
 
-  Widget buildSingleEventRow(EventModel event) {
+  Widget buildSingleEventRow(EventModel event, { promoted = false}) {
     var eventImageWidget = CachedNetworkImage(
       fit: BoxFit.cover,
       alignment: Alignment.center,
@@ -490,70 +561,197 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
                   event: event, prebuiltImageWidget: eventImageWidget));
         },
         child: Container(
-          padding: const EdgeInsets.only(left: 10, right: 10, bottom: 5),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            ClipRRect(
-                borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
-                child: SizedBox(height: 200, child: eventImageWidget)),
-            Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10)),
-                    border:
-                        Border.all(color: Colors.grey.shade400, width: 0.5)),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(event.name,
-                          style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87)),
-                      EventDetailsPartial(event: event),
-                      const HorizontalLine(),
-                      Text(
-                          event.shortDescription.length > 200
-                              ? "${event.shortDescription.substring(0, 200)}..."
-                              : event.shortDescription,
-                          style: TextStyle(color: Colors.grey.shade700)),
-                      EventActionsPartial(event: event, setState: setState)
-                    ]))
-          ]),
+            height: 200,
+            width: deviceMediaSize.width - 50,
+            margin: const EdgeInsets.only(left: 10, right: 10, bottom: 5),
+            decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(5)),
+                image: DecorationImage( // TODO: Implement loader or fade in
+                    image: NetworkImage(event.coverImageUrl),
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                    colorFilter: ColorFilter.mode(
+                        promoted ? Colors.red.withOpacity(0.6) : Colors.black.withOpacity(0.6),
+                        BlendMode.darken
+                    ))),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(top: 1),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        event.saved = !event.saved;
+                                      });
+                                      SnackbarHandler.show(context,
+                                          text: event.saved ? 'Event saved to wishlist!' : 'Event removed from wishlist!');
+                                    },
+                                    icon: Icon(event.saved ? LineIcons.heartAlt : LineIcons.heart,
+                                        color: event.saved ? Colors.redAccent : Colors.white))),
+                            ),
+                            Material(
+                              color: Colors.transparent,
+                              child: IconButton(
+                                  onPressed: () => addToCalendar(event),
+                                  icon: Icon(LineIcons.calendarPlus, color: Colors.grey.shade50))),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            promoted ? Container(
+                              padding: EdgeInsets.only(right: 5, left: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.amber,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: Container(
+                                padding: EdgeInsets.all(5),
+                                child: Text("Promoted",
+                                    style: TextStyle(color: promoted ? Colors.white : Colors.grey.shade700)),
+                              ),
+                            ) : Container(),
+                            Container(
+                              margin: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: promoted ? Colors.amber : Colors.white,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: Row(children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                      border: Border(right: BorderSide(color: promoted ? Colors.amberAccent : Colors.grey.shade300))
+                                  ),
+                                  padding: EdgeInsets.only(top: 4, left: 6, right: 4, bottom: 4.5),
+                                  child: Icon(CupertinoIcons.tickets, color: promoted ? Colors.white : Colors.grey.shade700, size: 12),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(5),
+                                  child: Text(event.ticketPrice > 0 ? event.ticketPrice.toStringAsFixed(2) : "Free",
+                                      style: TextStyle(color: promoted ? Colors.white : Colors.grey.shade700)),
+                                ),
+                              ]),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    child: Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(bottom: 10),
+                                  child: Text("${event.name[0].toUpperCase()}${event.name.toLowerCase().substring(1)}",
+                                      style: const TextStyle(
+                                          fontSize: 21,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white)),
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            margin: const EdgeInsets.only(right: 5),
+                                            child: Icon(CupertinoIcons.map, color: Colors.white, size: 12),
+                                          ),
+                                          Text("${event.eventLocation?.name}",
+                                              style: TextStyle(color: Colors.white, fontSize: 12)),
+                                        ],
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(top: 5),
+                                        child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                  margin: const EdgeInsets.only(right: 5),
+                                                  child: Icon(Icons.watch_later_outlined, color: Colors.white, size: 12)),
+                                              Flexible(child: buildDateContainer(event, Colors.white))
+                                            ]),
+                                      ),
+                                    ]
+                                ),
+                              ]
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ])),
+      ),
+    );
+  }
+
+  Widget buildFilterItemWidget(item, {
+    padding, inactiveColor, borderRadius, margin, searchOnSelect, border
+  }) {
+    var _padding = padding ?? const EdgeInsets.symmetric(vertical: 10, horizontal: 15);
+    var _inactiveColor = inactiveColor ?? Colors.grey.shade500;
+    var _borderRadius = borderRadius ?? BorderRadius.circular(50);
+    var _margin = margin ?? const EdgeInsets.all(0);
+    var _searchOnSelect = searchOnSelect ?? false;
+    var _border = border ?? Border.all(color: item.selected ? Colors.red.shade400 : _inactiveColor);
+
+    return Container(
+      margin: _margin,
+      child: Material(
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: _borderRadius),
+        child: InkWell(
+          customBorder: RoundedRectangleBorder(
+              borderRadius: _borderRadius),
+          splashColor: Colors.grey,
+          focusColor: Colors.grey,
+          onTap: () {
+            setState(() {
+              item.selected = !item.selected;
+            });
+            if (_searchOnSelect) {
+              onDoSearch();
+            }
+          },
+          child: Container(
+              padding: _padding,
+              decoration: BoxDecoration(
+                  borderRadius: _borderRadius,
+                  color: item.selected ? Colors.redAccent : Colors.transparent,
+                  border: _border,
+              ),
+              child: Text(item.text, style: TextStyle(color: item.selected ? Colors.white : _inactiveColor))
+          ),
         ),
       ),
     );
   }
 
-  Widget buildFilterItemWidget(item) {
-    return Material(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(150)),
-      child: InkWell(
-        customBorder: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(150)),
-        splashColor: Colors.grey,
-        focusColor: Colors.grey,
-        onTap: () {
-          setState(() {
-            item.selected = !item.selected;
-          });
-        },
-        child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
-                color: item.selected ? Colors.white : Colors.transparent,
-                border: Border.all(color: item.selected ? Colors.red.shade400 : Colors.grey.shade400)
-            ),
-            child: Text(item.text, style: TextStyle(color: item.selected ? Colors.red.shade400 : Colors.grey.shade400))
-        ),
-      ),
-    );
+  List<Widget> buildPriceFilterWidgets() {
+    List<Widget> widgets = [];
+
+    for (var filter in priceFilters) {
+      widgets.add(buildFilterItemWidget(filter));
+    }
+
+    return widgets;
   }
 
   List<Widget> buildDateFilterWidgets() {
@@ -564,6 +762,72 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
     }
 
     return widgets;
+  }
+
+  Widget buildUpcomingTitle() {
+    return Container(
+        child: Column(
+            children: [
+              Container(
+                  padding: EdgeInsets.only(top: 10, left: 12.5, bottom: 10),
+                  child: Text("Upcoming Events", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: Colors.grey.shade700)))
+            ]
+        )
+    );
+  }
+
+  Widget buildPopularEventsRow() {
+    List<Widget> children = [];
+
+    for (int i = 0; i < events.length; i++) {
+      children.add(buildSingleEventRow(events[i]));
+    }
+
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            Container(
+                width: deviceMediaSize.width,
+                padding: EdgeInsets.only(left: 12.5, bottom: 10),
+                child: Text("This Week", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: Colors.grey.shade700)))
+          ]
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: children
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget buildCategoryFilterRow() {
+    List<Widget> widgets = [];
+
+    for (var category in categories) {
+      widgets.add(buildFilterItemWidget(category,
+        padding: const EdgeInsets.symmetric(vertical: 7.5, horizontal: 7.5),
+        margin: const EdgeInsets.only(left: 5),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.white),
+        inactiveColor: Colors.grey.shade600,
+        searchOnSelect: true,
+      ));
+    }
+
+    return Container(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: widgets
+        ),
+      ),
+    );
   }
 
   List<Widget> buildCategoryFilterWidgets() {
@@ -649,14 +913,17 @@ class EventsOverviewActivityState extends BaseState<EventsOverviewActivity> {
 
     totalItemsLoaded += (obj['result']['totalElements'] as int);
 
-    if (obj['result']['totalElements'] == 0) {
+    if (obj['result']['last'] == true) {
       noMoreItemsToLoad = true;
     }
 
     events.addAll(EventModel.fromJsonList(obj['result']['content']));
 
     hideSearchBar();
+
     setState(() {
+      noEventsLoaded = obj['clearItems'] && events.length == 0;
+      print(noEventsLoaded);
       displayLoader = false;
       isLoadingOnScroll = false;
       isError = false;
